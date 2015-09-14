@@ -1,29 +1,37 @@
 package game;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 public class BrickMatrix {
-	
+
 	// This matrix is used to position the bricks on the scene
 	// There are to be 20 rows and 20 columns
-	public static String[] brickMatrix = {
-			"00000000000000000000",
-			"00r000r00r000rrr0000",
-			"0r0r0r0r0r000r000000",
-			"0r000r0r0r000r000000",
-			"00r00r0r0r000rrr0rr0",
-			"000r0rrr0r000r000000",
-			"0r0r0r0r0r000r000000",
-			"00r00r0r0rrr0rrr0000",
-			"00000000000000000000",
-			"r000r00r00rrr0r00rrr",
-			"rr0rr0r0r0r000r000r0",
-			"r0r0r0rrr0rrr0r000r0",
-			"r000r0r0r0r000r000r0",
-			"r000r0r0r0rrr0rr0rrr",
-			"00000000000000000000",
-			"0bbb000bbb000bbb0000",
-			"00000000000000000000",
-			"0000ggg000ggg000ggg0",
-			"00000000000000000000",
-			"m00m00y00y00m00y000m",
-	};
+	public static String[] brickMatrix = loadbrickMatrix();
+
+	private static String[] loadbrickMatrix() {
+		List<String> lines = new ArrayList<String>();
+		{
+			try {
+				Scanner reader = new Scanner(new FileReader("src/levels/brick_file.txt"));
+				
+				while (reader.hasNextLine()) {
+					String line = reader.nextLine();
+					lines.add(line);
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			return lines.toArray(new String[lines.size()]);
+		}
+	}
 }
+
+// }
