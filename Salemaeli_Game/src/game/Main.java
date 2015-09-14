@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
+import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -31,6 +32,22 @@ public class Main extends Application {
 
 		Canvas canvas = new Canvas(800, 600);
 		root.getChildren().add(canvas);
+		
+		mainScene.setCursor(Cursor.NONE); // HIDING THE CURSOR (because the board follows the cursor)
+		
+		// TODO: Move in a separate class
+		// Generating the bricks
+		ArrayList<Brick> bricks = new ArrayList<>();
+		
+		for (int i = 0; i < BrickMatrix.brickMatrix.length; i++) {
+			for (int j = 0; j < BrickMatrix.brickMatrix[i].length(); j++) {
+				if (BrickMatrix.brickMatrix[i].charAt(j) != '0') {
+					bricks.add(new Brick(j * 40, i * 20, BrickMatrix.brickMatrix[i].charAt(j)));
+				}
+			}
+		}
+		// Generate the board
+		Board board = new Board(350, 575);
 
 		ArrayList<String> inputKeys = new ArrayList<String>();
 		
@@ -56,32 +73,21 @@ public class Main extends Application {
 		Rectangle square = new Rectangle(100, 100);  // TODO: To be used for mouse clicks on 
 		
 		// THINGS TO DO ON MOUSE CLICKS
-		mainScene.setOnMouseClicked(new EventHandler<MouseEvent>()
-		        {
-		            public void handle(MouseEvent e)
-		            {
-		                if ( square.contains( e.getX(), e.getY() ) )
-		                {
+		mainScene.setOnMouseClicked(new EventHandler<MouseEvent>() {
+		            public void handle(MouseEvent e) {
+		                if ( square.contains( e.getX(), e.getY())) {
 		                    // TODO: Logic can be implemented here
 		                }
 		            }
 		        });
 		
-		GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
-		
-		// TODO: Move in a separate class
-		// Generating the bricks
-		ArrayList<Brick> bricks = new ArrayList<>();
-		
-		for (int i = 0; i < BrickMatrix.brickMatrix.length; i++) {
-			for (int j = 0; j < BrickMatrix.brickMatrix[i].length(); j++) {
-				if (BrickMatrix.brickMatrix[i].charAt(j) != '0') {
-					bricks.add(new Brick(j * 40, i * 20, BrickMatrix.brickMatrix[i].charAt(j)));
-				}
+		// THINGS TO DO WHEN THE MOUSE MOVES
+		mainScene.setOnMouseMoved(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				board.setPositionX((int) e.getX() - 50);
 			}
-		}
-		// Generate the board
-		Board board = new Board(350, 575);
+		});
+		GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 		
 //		final long gameStartTime = System.nanoTime(); // TODO: To be used on time dependent events
 		
