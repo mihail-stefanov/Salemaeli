@@ -3,6 +3,7 @@ package game;
 import javafx.scene.image.Image;
 
 public class Ball {
+	private boolean released = false;
 	private int positionX;
 	private int positionY;
 	private int velocityX;
@@ -15,6 +16,14 @@ public class Ball {
 		setVelocityX(velocityX);
 		setVelocityY(velocityY);
 		setImage();
+	}
+	
+	public boolean isReleased() {
+		return this.released;
+	}
+	
+	public void Release() {
+		this.released = true;
 	}
 	
 	public int getPositionX() {
