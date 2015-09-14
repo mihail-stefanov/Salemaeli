@@ -13,7 +13,7 @@ public class Ball {
 		setPositionX(positionX);
 		setPositionY(positionY);
 		setVelocityX(velocityX);
-		setVelocityX(velocityY);
+		setVelocityY(velocityY);
 		setImage();
 	}
 	

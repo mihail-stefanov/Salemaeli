@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -35,7 +36,8 @@ public class Main extends Application {
 		
 		mainScene.setCursor(Cursor.NONE); // HIDING THE CURSOR (because the board follows the cursor)
 		
-		// TODO: Move in a separate class
+		// TODO: Move in a separate method (for example: loadContent)
+		
 		// Generating the bricks
 		ArrayList<Brick> bricks = new ArrayList<>();
 		
@@ -49,6 +51,9 @@ public class Main extends Application {
 		// Generate the board
 		Board board = new Board(350, 575);
 
+		// Generate the ball
+		Ball ball = new Ball(board.getPositionX(), board.getPositionY() - 30, 0, 3);
+		
 		ArrayList<String> inputKeys = new ArrayList<String>();
 		
 		// THINGS TO DO ON KEY PRESSES
@@ -63,6 +68,8 @@ public class Main extends Application {
 		});
 		
 		// THINGS TO DO ON KEY RELEASES
+//		mainScene.setOnKeyReleased(event -> inputKeys.remove(event.getCode().toString())); // Shorter version of the same code
+		
 		mainScene.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			public void handle(KeyEvent e) {
 				String code = e.getCode().toString();
@@ -87,6 +94,7 @@ public class Main extends Application {
 				board.setPositionX((int) e.getX() - 50);
 			}
 		});
+		
 		GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 		
 //		final long gameStartTime = System.nanoTime(); // TODO: To be used on time dependent events
@@ -100,6 +108,23 @@ public class Main extends Application {
 				// TODO: To be used on time dependent events
 //				double elapsedTimeInSeconds = (currentTime - gameStartTime) / 1000000000.00;
 				
+				// COMMANDS EXECUTING EVERY FRAME GO HERE
+				
+				detectAndResolveCollisions(ball, board, bricks);
+				
+				// Moving the ball
+				ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
+				ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
+				
+				// Moving the board with keys, in addition to using the mouse position
+				if (inputKeys.contains("LEFT")) {
+					board.setPositionX(board.getPositionX() - 5);
+				}
+				if (inputKeys.contains("RIGHT")) {
+					board.setPositionX(board.getPositionX() + 5);
+				}
+				
+				// REDRAWING SCENE COMMANDS GO HERE
 				graphicsContext.clearRect(0, 0, 800, 600);
 				
 				// Drawing the bricks
@@ -110,19 +135,89 @@ public class Main extends Application {
 							bricks.get(i).getPositionY());
 				}
 				
-				// Moving the board
-				if (inputKeys.contains("LEFT")) {
-					board.setPositionX(board.getPositionX() - 5);
-				}
-				if (inputKeys.contains("RIGHT")) {
-					board.setPositionX(board.getPositionX() + 5);
-				}
-				
 				// Drawing the board
 				graphicsContext.drawImage(
 						board.getImage(), 
 						board.getPositionX(), 
 						board.getPositionY());
+				
+				// Drawing the ball
+				graphicsContext.drawImage(
+						ball.getImage(), 
+						ball.getPositionX() - 8, 
+						ball.getPositionY() - 8); // Centering the image to make collision calculations easier
+			}
+
+			private void detectAndResolveCollisions(Ball ball, Board board, ArrayList<Brick> bricks) {
+				// Collisions with walls
+				if (ball.getPositionX() < 8 ||
+					ball.getPositionX() > 792) {
+					ball.setVelocityX(ball.getVelocityX() * -1);
+				}
+				
+				if (ball.getPositionY() < 8) {
+					ball.setVelocityY(ball.getVelocityY() * -1);
+				}
+				
+				// Collisions with board
+				int boardBallDifferenceY = board.getPositionY() - ball.getPositionY();
+				int boardBallDifferenceX = board.getPositionX() - ball.getPositionX();
+				
+				if (boardBallDifferenceY < 8 && 
+					boardBallDifferenceY > 0 &&
+					boardBallDifferenceX < 8 &&
+					boardBallDifferenceX > -108) {
+					ball.setVelocityY(-3);
+					ball.setVelocityX(-1 * (boardBallDifferenceX + 50)/10);
+				}
+				
+				// Collisions with bricks
+				Iterator<Brick> brickIterator = bricks.iterator();
+				while (brickIterator.hasNext()) {
+					Brick currentBrick = brickIterator.next();
+					
+					int brickBallDifferenceY = currentBrick.getPositionY() - ball.getPositionY();
+					int brickBallDifferenceX = currentBrick.getPositionX() - ball.getPositionX();
+					
+					// Down-side collision
+					if (brickBallDifferenceY > -28 &&
+						brickBallDifferenceY < -20 &&
+						brickBallDifferenceX < 0 &&
+						brickBallDifferenceX > -40) {
+						currentBrick.setPositionX(-100);  // TODO: Find alternative to hide bricks
+						
+						ball.setVelocityY(ball.getVelocityY() * -1);
+					}
+					// Up-side collision
+					else if (brickBallDifferenceY < 8 &&
+							brickBallDifferenceY > 0 &&
+							brickBallDifferenceX < 0 &&
+							brickBallDifferenceX > -40) {
+							currentBrick.setPositionX(-100); // TODO: Find alternative to hide bricks
+							
+							ball.setVelocityY(ball.getVelocityY() * -1); 
+						}
+					
+					// Left-side collision
+					else if (brickBallDifferenceY < 0 &&
+							brickBallDifferenceY > -20 &&
+							brickBallDifferenceX < 8 &&
+							brickBallDifferenceX > 0) {
+							currentBrick.setPositionX(-100); // TODO: Find alternative to hide bricks
+							
+							ball.setVelocityX(ball.getVelocityX() * -1); 
+						}
+					
+					// Right-side collision
+					else if (brickBallDifferenceY < 0 &&
+							brickBallDifferenceY > -20 &&
+							brickBallDifferenceX > -48 &&
+							brickBallDifferenceX < -40) {
+							currentBrick.setPositionX(-100); // TODO: Find alternative to hide bricks
+							
+							ball.setVelocityX(ball.getVelocityX() * -1); 
+						}
+				}
 			}
 		}.start();
 
