@@ -45,7 +45,7 @@ public class Level {
 		switch (chosenDifficulty) {
 		case BABY:
 			setBallSpeed(3);
-			this.map = loadMap(""); // TODO: Level to be added
+			this.map = loadMap("src/levels/baby.txt"); // TODO: Level to be added
 			setNumberOfLives(5);
 			break;
 		case EASY:
@@ -55,7 +55,7 @@ public class Level {
 			break;
 		case HARD:
 			setBallSpeed(5);
-			this.map = loadMap(""); // TODO: Level to be added
+			this.map = loadMap("src/levels/hard.txt"); 
 			setNumberOfLives(3);
 			break;
 		case PRO:
