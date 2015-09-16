@@ -151,7 +151,7 @@ public class Main extends Application {
 
 		if (boardBallDifferenceY < ballRadius && boardBallDifferenceY > 0 && boardBallDifferenceX < ballRadius
 				&& boardBallDifferenceX > -(boardsWidth + ballRadius)) {
-			ball.setVelocityY(-3);
+			ball.setVelocityY((int)level.getballSpeed());
 			ball.setVelocityX(-1 * ((boardBallDifferenceX + 50) / 10));
 		}
 
