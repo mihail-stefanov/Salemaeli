@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 	
 	Canvas canvas = new Canvas(800, 600);
+	Level level = new Level(Difficulty.EASY);
 	GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 	
 	ArrayList<String> inputKeys = new ArrayList<String>();
@@ -33,10 +34,10 @@ public class Main extends Application {
 
 	private void initializeObjects() {
 		// Generating the bricks
-		for (int i = 0; i < BrickMatrix.brickMatrix.length; i++) {
-			for (int j = 0; j < BrickMatrix.brickMatrix[i].length(); j++) {
-				if (BrickMatrix.brickMatrix[i].charAt(j) != '0') {
-					bricks.add(new Brick(j * 40, i * 20, BrickMatrix.brickMatrix[i].charAt(j)));
+		for (int i = 0; i < level.getMap().length; i++) {
+			for (int j = 0; j < level.getMap()[i].length(); j++) {
+				if (level.getMap()[i].charAt(j) != '0') {
+					bricks.add(new Brick(j * 40, i * 20, level.getMap()[i].charAt(j)));
 				}
 			}
 		}
