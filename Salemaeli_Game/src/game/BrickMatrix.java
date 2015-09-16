@@ -14,24 +14,7 @@ public class BrickMatrix {
 	// There are to be 20 rows and 20 columns
 	public static String[] brickMatrix = loadbrickMatrix();
 
-	private static String[] loadbrickMatrix() {
-		List<String> lines = new ArrayList<String>();
-		{
-			try {
-				Scanner reader = new Scanner(new FileReader("src/levels/brick_file.txt"));
-				
-				while (reader.hasNextLine()) {
-					String line = reader.nextLine();
-					lines.add(line);
-				}
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 
-			return lines.toArray(new String[lines.size()]);
-		}
-	}
 }
 
 

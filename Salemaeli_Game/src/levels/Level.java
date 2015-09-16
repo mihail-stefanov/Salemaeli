@@ -1,68 +1,69 @@
-//package game;
-//
-//import javafx.scene.image.Image;
-//
-//public class Brick {
-//	private int positionX;
-//	private int positionY;
-//	private char color;
-//	private Image image;
-//	
-//	public Brick (int positionX, int positionY, char colorLetter) { 
-//		setPositionX(positionX);
-//		setPositionY(positionY);
-//		this.color = colorLetter;
-//		setImage();
-//	}
-//	
-//	public int getPositionX() {
-//		return this.positionX;
-//	}
-//	
-//	public void setPositionX(int positionX) {
-//		this.positionX = positionX;
-//	}
-//	
-//	public int getPositionY() {
-//		return this.positionY;
-//	}
-//	
-//	public void setPositionY(int positionY) {
-//		this.positionY = positionY;
-//	}
-//	
-//	public Image getImage() {
-//		return this.image;
-//	}
-//	
-//	private void setImage() {
-//		switch (color) {
-//		case 'b':
-//			this.image = new Image("images/brick_blue.png");
-//			break;
-//		case 'n':
-//			this.image = new Image("images/brick_brown.png");
-//			break;
-//		case 'g':
-//			this.image = new Image("images/brick_green.png");
-//			break;
-//		case 'm':
-//			this.image = new Image("images/brick_magenta.png");
-//			break;
-//		case 'o':
-//			this.image = new Image("images/brick_orange.png");
-//			break;
-//		case 'r':
-//			this.image = new Image("images/brick_red.png");
-//			break;
-//		case 't':
-//			this.image = new Image("images/brick_teal.png");
-//			break;
-//		case 'y':
-//			this.image = new Image("images/brick_yellow.png");
-//			break;
-//		default:
-//			throw new Error("Cannot find sprite for brick! Please check if the file is present!");
-//		}
-//	}
-//}
+package levels;
+
+ import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import game.*;
+
+public class Level {
+    private double ballSpeed;
+    private String choosenDifficult;
+    private int numberOfLives;
+    private String[] map;
+    
+    public Level(String choosenDifficult) {
+        setBallSpeed(ballSpeed);
+        setLevelItem();
+    }
+
+    public double getballSpeed() {
+        return this.ballSpeed;
+    }
+
+    public void setBallSpeed(double ballSpeed) {
+        this.ballSpeed = ballSpeed;
+    }
+
+    private void setLevelItem() {
+        switch ("choosenDifficult") {
+            case "baby":
+                this.ballSpeed = 3;
+                break;
+            case "easy":
+                this.ballSpeed = 4;
+                this.map=loadMap("src/levels/easy.txt");
+                break;
+            case "hard":
+                this.ballSpeed = 5;
+                break;
+            case "pro":
+                this.ballSpeed = 7;
+                this.map=loadMap("src/levels/pro.txt"); 
+                break;
+            default:
+                throw new Error("Cannot find correct level difficulty! Please check is it baby, easy, hard or pro!");
+        }
+    }
+    
+	private String[] loadMap(String levelFile) {
+		List<String> lines = new ArrayList<String>();
+		{
+			try {
+				Scanner reader = new Scanner(new FileReader(levelFile));
+				
+				while (reader.hasNextLine()) {
+					String line = reader.nextLine();
+					lines.add(line);
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			return lines.toArray(new String[lines.size()]);
+		}
+	}
+}
