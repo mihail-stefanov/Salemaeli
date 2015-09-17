@@ -1,7 +1,6 @@
 package game;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -24,7 +23,7 @@ public class Main extends Application {
 	ArrayList<Brick> bricks = new ArrayList<>();
 	ArrayList<Coin> coins = new ArrayList<>();
 	Board board = new Board(350, 575);
-	Ball ball = new Ball(board.getPositionX() + 50, board.getPositionY() - 8, 0, (int) level.getballSpeed());
+	Ball ball = new Ball(board.getPositionX() + Board.width / 2, board.getPositionY() - Ball.radius, 0, level.getballVelocity());
 
 	public static void main(String[] args) {
 		launch(args);
@@ -72,10 +71,10 @@ public class Main extends Application {
 		mainScene.setOnKeyReleased(event -> inputKeys.remove(event.getCode().toString()));
 		
 		// THINGS TO DO ON MOUSE CLICKS
-		mainScene.setOnMouseClicked(event -> ball.Release());
+		mainScene.setOnMouseClicked(event -> ball.release());
 
 		// THINGS TO DO WHEN THE MOUSE MOVES
-		mainScene.setOnMouseMoved(event -> board.setPositionX((int) event.getX() - 50));
+		mainScene.setOnMouseMoved(event -> board.setPositionX((int) event.getX() - Board.width / 2));
 
 		// final long gameStartTime = System.nanoTime(); 
 		// TODO: To be used on time dependent events
@@ -102,7 +101,7 @@ public class Main extends Application {
 		for (int i = 0; i < level.getMap().length; i++) {
 			for (int j = 0; j < level.getMap()[i].length(); j++) {
 				if (level.getMap()[i].charAt(j) != '0') {
-					bricks.add(new Brick(j * 40, i * 20, level.getMap()[i].charAt(j)));
+					bricks.add(new Brick(j * Brick.width, i * Brick.height, level.getMap()[i].charAt(j)));
 				}
 			}
 		}
@@ -115,19 +114,19 @@ public class Main extends Application {
 		// Moving the coins
 		for (int i = 0; i < coins.size(); i++) {
 			coins.get(i).updateVelocityY();
-			coins.get(i).setPositionY((int)(coins.get(i).getPositionY() + coins.get(i).getVelocityY()));
-			coins.get(i).setPositionX((int)(coins.get(i).getPositionX() + coins.get(i).getVelocityX()));
+			coins.get(i).setPositionY(coins.get(i).getPositionY() + coins.get(i).getVelocityY());
+			coins.get(i).setPositionX(coins.get(i).getPositionX() + coins.get(i).getVelocityX());
 		}
 		// Moving the ball if the mouse is clicked or the space is pressed
 		if (inputKeys.contains("SPACE")) {
-			ball.Release();
+			ball.release();
 		}
 		if (ball.isReleased()) {
 			ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
 			ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
 		} else {
-			ball.setPositionX(board.getPositionX() + 50);
-			ball.setPositionY(board.getPositionY() - 8);
+			ball.setPositionX(board.getPositionX() + Board.width / 2);
+			ball.setPositionY(board.getPositionY() - Ball.radius);
 		}
 
 		// Moving the board with keys, in addition to using the mouse position
@@ -140,38 +139,33 @@ public class Main extends Application {
 	}
 
 	private void detectAndResolveCollisions() {
-		int ballRadius = 8;
-		int boardsWidth = 100;
-
 		// Collisions with walls
-		if (ball.getPositionX() < ballRadius || ball.getPositionX() > canvas.getWidth() - ballRadius) {
+		if (ball.getPositionX() < Ball.radius || ball.getPositionX() > canvas.getWidth() - Ball.radius) {
 			ball.setVelocityX(ball.getVelocityX() * -1);
 		}
 
-		if (ball.getPositionY() < ballRadius) {
+		if (ball.getPositionY() < Ball.radius) {
 			ball.setVelocityY(ball.getVelocityY() * -1);
 		}
 
 		// Ball collisions with board
-		int boardBallDifferenceY = board.getPositionY() - ball.getPositionY();
-		int boardBallDifferenceX = board.getPositionX() - ball.getPositionX();
+		double boardBallDifferenceY = board.getPositionY() - ball.getPositionY();
+		double boardBallDifferenceX = board.getPositionX() - ball.getPositionX();
 
-		if (boardBallDifferenceY < ballRadius && boardBallDifferenceY > 0 && boardBallDifferenceX < ballRadius
-				&& boardBallDifferenceX > -(boardsWidth + ballRadius)) {
-			ball.setVelocityY((int)level.getballSpeed());
-			ball.setVelocityX(-1 * ((boardBallDifferenceX + 50) / 10));
+		if (boardBallDifferenceY < Ball.radius && boardBallDifferenceY > 0 && boardBallDifferenceX < Ball.radius
+				&& boardBallDifferenceX > -(Board.width + Ball.radius)) {
+			ball.setVelocityY(level.getballVelocity());
+			ball.setVelocityX(-1 * ((boardBallDifferenceX + Board.width / 2) / 10));
 		}
 		
 		// Coin collisions with board
-		int coinRadius = 15;
-		
 		for (int i = 0; i < coins.size(); i++) {
 		
-			int boardCoinDifferenceY = board.getPositionY() - coins.get(i).getPositionY();
-			int boardCoinDifferenceX = board.getPositionX() - coins.get(i).getPositionX();
+			double boardCoinDifferenceY = board.getPositionY() - coins.get(i).getPositionY();
+			double boardCoinDifferenceX = board.getPositionX() - coins.get(i).getPositionX();
 			
-			if (boardCoinDifferenceY < coinRadius && boardCoinDifferenceY > -coinRadius && boardCoinDifferenceX < coinRadius
-					&& boardCoinDifferenceX > -(boardsWidth + coinRadius)) {
+			if (boardCoinDifferenceY < Coin.radius && boardCoinDifferenceY > -Coin.radius && boardCoinDifferenceX < Coin.radius
+					&& boardCoinDifferenceX > -(Board.width + Coin.radius)) {
 				coins.remove(i);
 			}
 				
@@ -179,17 +173,14 @@ public class Main extends Application {
 
 		// Collisions with bricks
 		for(int i = 0; i < bricks.size(); i++) {
-
-			int brickHeight = 20;
-			int brickWidth = 40;
-			int brickBallDifferenceY = bricks.get(i).getPositionY() - ball.getPositionY();
-			int brickBallDifferenceX = bricks.get(i).getPositionX() - ball.getPositionX();
+			double brickBallDifferenceY = bricks.get(i).getPositionY() - ball.getPositionY();
+			double brickBallDifferenceX = bricks.get(i).getPositionX() - ball.getPositionX();
 
 			// Checking if the ball has collided with the brick
-			if (brickBallDifferenceY > -(brickHeight + ballRadius) && brickBallDifferenceY < ballRadius
-					&& brickBallDifferenceX > -(brickWidth + ballRadius) && brickBallDifferenceX < ballRadius) {
+			if (brickBallDifferenceY > -(Brick.height + Ball.radius) && brickBallDifferenceY < Ball.radius
+					&& brickBallDifferenceX > -(Brick.width + Ball.radius) && brickBallDifferenceX < Ball.radius) {
 				// Checking the location of the collision
-				if (brickBallDifferenceX < ballRadius / 2 && brickBallDifferenceX > -(brickWidth + ballRadius / 2)) {
+				if (brickBallDifferenceX < Ball.radius / 2 && brickBallDifferenceX > -(Brick.width + Ball.radius / 2)) {
 					ball.setVelocityY(ball.getVelocityY() * -1);
 					ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
 					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
@@ -227,15 +218,15 @@ public class Main extends Application {
 		for (int i = 0; i < coins.size(); i++) {
 			graphicsContext.drawImage(
 					coins.get(i).getImage(), 
-					coins.get(i).getPositionX() - 15, 
-					coins.get(i).getPositionY() - 15);
+					coins.get(i).getPositionX() - Coin.radius, 
+					coins.get(i).getPositionY() - Coin.radius);
 		}
 
 		// Drawing the ball (creating an offset equal to the ball's radius, i.e. 8)
 		graphicsContext.drawImage(
 				ball.getImage(), 
-				ball.getPositionX() - 8, 
-				ball.getPositionY() - 8); 
+				ball.getPositionX() - Ball.radius, 
+				ball.getPositionY() - Ball.radius); 
 	}
 
 	@Override

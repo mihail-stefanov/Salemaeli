@@ -3,10 +3,12 @@ package game;
 import javafx.scene.image.Image;
 
 public class Brick extends GraphicalObject {
+	public static double width = 40;
+	public static double height = 20;
 	private char color;
 	private Image image;
 	
-	public Brick (int positionX, int positionY, char colorLetter) { 
+	public Brick (double positionX, double positionY, char colorLetter) { 
 		super(positionX, positionY);
 		this.color = colorLetter;
 		setImage();
