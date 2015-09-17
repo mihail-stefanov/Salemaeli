@@ -2,40 +2,21 @@ package game;
 
 import javafx.scene.image.Image;
 
-public class Brick {
-	private int positionX;
-	private int positionY;
+public class Brick extends GraphicalObject {
 	private char color;
 	private Image image;
 	
 	public Brick (int positionX, int positionY, char colorLetter) { 
-		setPositionX(positionX);
-		setPositionY(positionY);
+		super(positionX, positionY);
 		this.color = colorLetter;
 		setImage();
-	}
-	
-	public int getPositionX() {
-		return this.positionX;
-	}
-	
-	public void setPositionX(int positionX) {
-		this.positionX = positionX;
-	}
-	
-	public int getPositionY() {
-		return this.positionY;
-	}
-	
-	public void setPositionY(int positionY) {
-		this.positionY = positionY;
 	}
 	
 	public Image getImage() {
 		return this.image;
 	}
 	
-	private void setImage() {
+	protected void setImage() {
 		switch (color) {
 		case 'b':
 			this.image = new Image("images/brick_blue.png");
