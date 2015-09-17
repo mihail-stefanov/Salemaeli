@@ -20,8 +20,8 @@ public class Ball extends GraphicalObject {
 		return this.released;
 	}
 	
-	public void release() {
-		this.released = true;
+	public void setAsReleased(boolean released) {
+		this.released = released;
 	}
 	
 	public double getVelocityX() {

@@ -23,7 +23,7 @@ public class Main extends Application {
 	ArrayList<Brick> bricks = new ArrayList<>();
 	ArrayList<Coin> coins = new ArrayList<>();
 	Board board = new Board(350, 575);
-	Ball ball = new Ball(board.getPositionX() + Board.width / 2, board.getPositionY() - Ball.radius, 0, level.getballVelocity());
+	Ball ball = new Ball(board.getPositionX() + Board.width / 2, board.getPositionY() - Ball.radius, 1, level.getballVelocity());
 
 	public static void main(String[] args) {
 		launch(args);
@@ -52,37 +52,25 @@ public class Main extends Application {
 	}
 	
 	private void beginGame(Scene scene) {
-
 		Scene mainScene = scene;
-		
-		mainScene.setCursor(Cursor.NONE); // HIDING THE CURSOR
+		mainScene.setCursor(Cursor.NONE);
 
 		initializeObjects();
 		
-		// THINGS TO DO ON KEY PRESSES
 		mainScene.setOnKeyPressed(event -> {
 			String code = event.getCode().toString();
 			if (!inputKeys.contains(code)) {
 				inputKeys.add(code);
 			}
 		});
-
-		// THINGS TO DO ON KEY RELEASES
 		mainScene.setOnKeyReleased(event -> inputKeys.remove(event.getCode().toString()));
-		
-		// THINGS TO DO ON MOUSE CLICKS
-		mainScene.setOnMouseClicked(event -> ball.release());
-
-		// THINGS TO DO WHEN THE MOUSE MOVES
+		mainScene.setOnMouseClicked(event -> ball.setAsReleased(true));
 		mainScene.setOnMouseMoved(event -> board.setPositionX((int) event.getX() - Board.width / 2));
 
-		// final long gameStartTime = System.nanoTime(); 
-		// TODO: To be used on time dependent events
 		AnimationTimer gameLoop = new AnimationTimer() {
 			
 			@Override
 			public void handle(long now) {
-				// TODO Auto-generated method stub
 				updateObjects();
 				drawObjects();
 			}
@@ -110,16 +98,17 @@ public class Main extends Application {
 	private void updateObjects() {
 
 		detectAndResolveCollisions();
-
+		
 		// Moving the coins
 		for (int i = 0; i < coins.size(); i++) {
 			coins.get(i).updateVelocityY();
 			coins.get(i).setPositionY(coins.get(i).getPositionY() + coins.get(i).getVelocityY());
 			coins.get(i).setPositionX(coins.get(i).getPositionX() + coins.get(i).getVelocityX());
 		}
+		
 		// Moving the ball if the mouse is clicked or the space is pressed
 		if (inputKeys.contains("SPACE")) {
-			ball.release();
+			ball.setAsReleased(true);
 		}
 		if (ball.isReleased()) {
 			ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
@@ -139,48 +128,73 @@ public class Main extends Application {
 	}
 
 	private void detectAndResolveCollisions() {
-		// Collisions with walls
-		if (ball.getPositionX() < Ball.radius || ball.getPositionX() > canvas.getWidth() - Ball.radius) {
+		
+		// Ball collisions with the walls
+		boolean ballHitWalls = ball.getPositionX() < Ball.radius || 
+								ball.getPositionX() > canvas.getWidth() - Ball.radius;
+		
+		if (ballHitWalls) {
 			ball.setVelocityX(ball.getVelocityX() * -1);
 		}
-
-		if (ball.getPositionY() < Ball.radius) {
+		
+		boolean ballHitCeiling = ball.getPositionY() < Ball.radius;
+		
+		if (ballHitCeiling) {
 			ball.setVelocityY(ball.getVelocityY() * -1);
 		}
+		
+		boolean ballHitFloor = ball.getPositionY() > canvas.getHeight() + Ball.radius;
+		
+		if (ballHitFloor) {
+			// TODO: Implement losing lives logic entry here
+			ball.setAsReleased(false);
+			ball.setPositionX(board.getPositionX() + Board.width / 2);
+			ball.setPositionY(board.getPositionY() - Ball.radius);
+		}
 
-		// Ball collisions with board
+		// Ball collisions with the board
 		double boardBallDifferenceY = board.getPositionY() - ball.getPositionY();
 		double boardBallDifferenceX = board.getPositionX() - ball.getPositionX();
 
-		if (boardBallDifferenceY < Ball.radius && boardBallDifferenceY > 0 && boardBallDifferenceX < Ball.radius
-				&& boardBallDifferenceX > -(Board.width + Ball.radius)) {
+		boolean ballHitBoard = boardBallDifferenceY < Ball.radius && 
+								boardBallDifferenceY > 0 && 
+								boardBallDifferenceX < Ball.radius && 
+								boardBallDifferenceX > -(Board.width + Ball.radius);
+		if (ballHitBoard) {
 			ball.setVelocityY(level.getballVelocity());
 			ball.setVelocityX(-1 * ((boardBallDifferenceX + Board.width / 2) / 10));
 		}
 		
-		// Coin collisions with board
+		// Coin collisions with the board
 		for (int i = 0; i < coins.size(); i++) {
-		
 			double boardCoinDifferenceY = board.getPositionY() - coins.get(i).getPositionY();
 			double boardCoinDifferenceX = board.getPositionX() - coins.get(i).getPositionX();
 			
-			if (boardCoinDifferenceY < Coin.radius && boardCoinDifferenceY > -Coin.radius && boardCoinDifferenceX < Coin.radius
-					&& boardCoinDifferenceX > -(Board.width + Coin.radius)) {
+			boolean coinHitBoard = boardCoinDifferenceY < Coin.radius && 
+									boardCoinDifferenceY > -Coin.radius && 
+									boardCoinDifferenceX < Coin.radius && 
+									boardCoinDifferenceX > -(Board.width + Coin.radius);
+			if (coinHitBoard) {
+				// TODO: Implement points addition logic entry here
 				coins.remove(i);
 			}
 				
 		}
 
-		// Collisions with bricks
+		// Ball collisions with bricks
 		for(int i = 0; i < bricks.size(); i++) {
 			double brickBallDifferenceY = bricks.get(i).getPositionY() - ball.getPositionY();
 			double brickBallDifferenceX = bricks.get(i).getPositionX() - ball.getPositionX();
 
-			// Checking if the ball has collided with the brick
-			if (brickBallDifferenceY > -(Brick.height + Ball.radius) && brickBallDifferenceY < Ball.radius
-					&& brickBallDifferenceX > -(Brick.width + Ball.radius) && brickBallDifferenceX < Ball.radius) {
-				// Checking the location of the collision
-				if (brickBallDifferenceX < Ball.radius / 2 && brickBallDifferenceX > -(Brick.width + Ball.radius / 2)) {
+			boolean ballHitBrick = brickBallDifferenceY > -(Brick.height + Ball.radius) && 
+									brickBallDifferenceY < Ball.radius && 
+									brickBallDifferenceX > -(Brick.width + Ball.radius) && 
+									brickBallDifferenceX < Ball.radius;
+					
+			if (ballHitBrick) {
+				boolean ballHitBrickVertically = brickBallDifferenceX < Ball.radius / 2 &&
+													brickBallDifferenceX > -(Brick.width + Ball.radius / 2);
+				if (ballHitBrickVertically) {
 					ball.setVelocityY(ball.getVelocityY() * -1);
 					ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
 					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
