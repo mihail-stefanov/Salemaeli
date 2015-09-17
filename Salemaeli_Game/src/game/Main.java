@@ -22,6 +22,7 @@ public class Main extends Application {
 	ArrayList<String> inputKeys = new ArrayList<String>();
 	
 	ArrayList<Brick> bricks = new ArrayList<>();
+	ArrayList<Coin> coins = new ArrayList<>();
 	Board board = new Board(350, 575);
 	Ball ball = new Ball(board.getPositionX() + 50, board.getPositionY() - 8, 0, (int) level.getballSpeed());
 
@@ -109,8 +110,14 @@ public class Main extends Application {
 
 	private void updateObjects() {
 
-		detectAndResolveCollisions(canvas, ball, board, bricks);
+		detectAndResolveCollisions();
 
+		// Moving the coins
+		for (int i = 0; i < coins.size(); i++) {
+			coins.get(i).updateVelocityY();
+			coins.get(i).setPositionY((int)(coins.get(i).getPositionY() + coins.get(i).getVelocityY()));
+			coins.get(i).setPositionX((int)(coins.get(i).getPositionX() + coins.get(i).getVelocityX()));
+		}
 		// Moving the ball if the mouse is clicked or the space is pressed
 		if (inputKeys.contains("SPACE")) {
 			ball.Release();
@@ -132,7 +139,7 @@ public class Main extends Application {
 		}
 	}
 
-	private void detectAndResolveCollisions(Canvas canvas, Ball ball, Board board, ArrayList<Brick> bricks) {
+	private void detectAndResolveCollisions() {
 		int ballRadius = 8;
 		int boardsWidth = 100;
 
@@ -145,7 +152,7 @@ public class Main extends Application {
 			ball.setVelocityY(ball.getVelocityY() * -1);
 		}
 
-		// Collisions with board
+		// Ball collisions with board
 		int boardBallDifferenceY = board.getPositionY() - ball.getPositionY();
 		int boardBallDifferenceX = board.getPositionX() - ball.getPositionX();
 
@@ -154,16 +161,29 @@ public class Main extends Application {
 			ball.setVelocityY((int)level.getballSpeed());
 			ball.setVelocityX(-1 * ((boardBallDifferenceX + 50) / 10));
 		}
+		
+		// Coin collisions with board
+		int coinRadius = 15;
+		
+		for (int i = 0; i < coins.size(); i++) {
+		
+			int boardCoinDifferenceY = board.getPositionY() - coins.get(i).getPositionY();
+			int boardCoinDifferenceX = board.getPositionX() - coins.get(i).getPositionX();
+			
+			if (boardCoinDifferenceY < coinRadius && boardCoinDifferenceY > -coinRadius && boardCoinDifferenceX < coinRadius
+					&& boardCoinDifferenceX > -(boardsWidth + coinRadius)) {
+				coins.remove(i);
+			}
+				
+		}
 
 		// Collisions with bricks
-		Iterator<Brick> brickIterator = bricks.iterator();
-		while (brickIterator.hasNext()) {
-			Brick currentBrick = brickIterator.next();
+		for(int i = 0; i < bricks.size(); i++) {
 
 			int brickHeight = 20;
 			int brickWidth = 40;
-			int brickBallDifferenceY = currentBrick.getPositionY() - ball.getPositionY();
-			int brickBallDifferenceX = currentBrick.getPositionX() - ball.getPositionX();
+			int brickBallDifferenceY = bricks.get(i).getPositionY() - ball.getPositionY();
+			int brickBallDifferenceX = bricks.get(i).getPositionX() - ball.getPositionX();
 
 			// Checking if the ball has collided with the brick
 			if (brickBallDifferenceY > -(brickHeight + ballRadius) && brickBallDifferenceY < ballRadius
@@ -172,13 +192,14 @@ public class Main extends Application {
 				if (brickBallDifferenceX < ballRadius / 2 && brickBallDifferenceX > -(brickWidth + ballRadius / 2)) {
 					ball.setVelocityY(ball.getVelocityY() * -1);
 					ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
-					currentBrick.setPositionX(-100); // TODO: Find alternative
-														// to hide bricks
+					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					bricks.remove(i);
+					
 				} else {
 					ball.setVelocityX(ball.getVelocityX() * -1);
 					ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
-					currentBrick.setPositionX(-100); // TODO: Find alternative
-														// to hide bricks
+					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					bricks.remove(i);
 				}
 			}
 		}
@@ -201,6 +222,14 @@ public class Main extends Application {
 				board.getImage(), 
 				board.getPositionX(), 
 				board.getPositionY());
+		
+		// Drawing the coins
+		for (int i = 0; i < coins.size(); i++) {
+			graphicsContext.drawImage(
+					coins.get(i).getImage(), 
+					coins.get(i).getPositionX() - 15, 
+					coins.get(i).getPositionY() - 15);
+		}
 
 		// Drawing the ball (creating an offset equal to the ball's radius, i.e. 8)
 		graphicsContext.drawImage(
