@@ -1,5 +1,7 @@
 package game;
 
+import java.util.ArrayList;
+
 import javafx.scene.image.Image;
 
 public class Board extends GraphicalObject {
@@ -18,5 +20,14 @@ public class Board extends GraphicalObject {
 	
 	protected void setImage() {
 		this.image = new Image("images/board.png");
+	}
+	
+	public void move(ArrayList<String> inputKeys) {
+		if (inputKeys.contains("LEFT")) {
+			this.setPositionX(this.getPositionX() - 5);
+		}
+		if (inputKeys.contains("RIGHT")) {
+			this.setPositionX(this.getPositionX() + 5);
+		}
 	}
 }

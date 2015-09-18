@@ -4,11 +4,19 @@ import java.util.ArrayList;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.InnerShadow;
+import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -30,25 +38,73 @@ public class Main extends Application {
 	}
 
 	private void showStartScreen(Scene scene) {
-//		// TODO: To be implemented
-//		Scene beginScene = scene;
-//		beginScene.setCursor(Cursor.HAND);
-//
-//		
-//		AnimationTimer startLoop = new AnimationTimer() {
-//			
-//			@Override
-//			public void handle(long now) {
-//				// TODO Auto-generated method stub
-//				// TODO: To be implemented
-//			}
-//		};
-//		startLoop.start();
-//		
-//		beginScene.setOnMouseClicked(event -> {
-//			startLoop.stop();
+		// TODO: To be implemented
+		Scene beginScene = scene;
+		beginScene.setCursor(Cursor.HAND);
+		
+		GraphicsContext gc = canvas.getGraphicsContext2D();
+		
+		InnerShadow is = new InnerShadow();
+		is.setOffsetX(4.0f);
+		is.setOffsetY(4.0f);
+		
+		// Title
+		gc.setFill( Color.RED );
+	    gc.setStroke( Color.BLACK );
+	    gc.setLineWidth(3);
+	    Font titleFont = Font.font(null, FontWeight.BOLD, 80);
+	    gc.setFont( titleFont );
+	    gc.setEffect(is);
+	    gc.fillText( "Break&Collect!", 100, 100 );
+	    
+	    //Main Menu
+	    gc.setFill( Color.GOLD );
+	    gc.setStroke( Color.BLACK );
+	    gc.setLineWidth(2);
+	    Font menuFont = Font.font(null, FontWeight.BOLD, 40);
+	    gc.setFont( menuFont );
+	    gc.fillText( "Start Game", 250, 200 );
+	    gc.fillText( "Instructions", 250, 300 );
+	    gc.fillText( "Choose Difficulty", 250, 400 );
+	    gc.fillText( "Exit", 250, 500 );
+	    
+	    //Images
+	    Image blueBrick = new Image("images/brick_blue.png");
+	    Image tealBrick = new Image("images/brick_teal.png");
+	    Image greenBrick = new Image("images/brick_green.png");
+	    Image magentaBrick = new Image("images/brick_magenta.png");
+	    Image coin = new Image("images/coin.png");
+	    
+	    // Buttons
+	    Rectangle startTarget = new Rectangle(250, 200);
+	    
+		AnimationTimer startLoop = new AnimationTimer() {
+			
+			@Override
+			public void handle(long now) {
+				gc.drawImage( blueBrick, 200, 175 );
+	            gc.drawImage( tealBrick, 200, 275 );
+	            gc.drawImage( greenBrick, 200, 375 );
+	            gc.drawImage( magentaBrick, 200, 475 );
+			}
+		};
+		startLoop.start();
+		
+		beginScene.setOnMouseEntered(
+		        new EventHandler<MouseEvent>()
+		        {
+		            public void handle(MouseEvent e)
+		            {
+		                if ( startTarget.contains( e.getX(), e.getY() ) )
+		                {
+		                    
+		                }
+		            }});
+		
+		beginScene.setOnMouseClicked(event -> {
+			startLoop.stop();
 			beginGame(scene);
-//		});
+		});
 	}
 	
 	private void beginGame(Scene scene) {
@@ -78,8 +134,7 @@ public class Main extends Application {
 		
 		gameLoop.start();
 	}
-	
-	
+		
 	private void showGameOverScreen(Scene scene) {
 		// TODO: To be implemented (entered into after calling "gameloop.stop();")
 	}
@@ -119,12 +174,7 @@ public class Main extends Application {
 		}
 
 		// Moving the board with keys, in addition to using the mouse position
-		if (inputKeys.contains("LEFT")) {
-			board.setPositionX(board.getPositionX() - 5);
-		}
-		if (inputKeys.contains("RIGHT")) {
-			board.setPositionX(board.getPositionX() + 5);
-		}
+		board.move(inputKeys);
 	}
 
 	private void detectAndResolveCollisions() {
