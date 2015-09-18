@@ -3,27 +3,27 @@ package game;
 import javafx.scene.image.Image;
 
 public abstract class GraphicalObject {
-	private int positionX;
-	private int positionY;
+	private double positionX;
+	private double positionY;
 	
-	public GraphicalObject(int positionX, int positionY) {
+	public GraphicalObject(double positionX, double positionY) {
 		setPositionX(positionX);
 		setPositionY(positionY);
 	}
 	
-	public int getPositionX() {
+	public double getPositionX() {
 		return this.positionX;
 	}
 	
-	public void setPositionX(int positionX) {
+	public void setPositionX(double positionX) {
 		this.positionX = positionX;
 	}
 	
-	public int getPositionY() {
+	public double getPositionY() {
 		return this.positionY;
 	}
 	
-	public void setPositionY(int positionY) {
+	public void setPositionY(double positionY) {
 		this.positionY = positionY;
 	}
 	

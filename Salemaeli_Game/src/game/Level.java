@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Level {
-	private double ballSpeed;
+	private double ballVelocity;
 	private Difficulty chosenDifficulty;
 	private int numberOfLives;
 	private String[] map;
@@ -17,12 +17,12 @@ public class Level {
 		setLevelItems();
 	}
 
-	public double getballSpeed() {
-		return this.ballSpeed;
+	public double getballVelocity() {
+		return this.ballVelocity;
 	}
 
-	private void setBallSpeed(double ballSpeed) {
-		this.ballSpeed = ballSpeed;
+	private void setBallVelocity(double ballVelocity) {
+		this.ballVelocity = ballVelocity;
 	}
 	
 	private void setChosenDifficulty(Difficulty chosenDifficulty) {
@@ -44,22 +44,22 @@ public class Level {
 	private void setLevelItems() {
 		switch (chosenDifficulty) {
 		case BABY:
-			setBallSpeed(-3);
+			setBallVelocity(-3);
 			this.map = loadMap("src/levels/baby.txt"); // TODO: Level to be added
 			setNumberOfLives(5);
 			break;
 		case EASY:
-			setBallSpeed(-4);
+			setBallVelocity(-4);
 			this.map = loadMap("src/levels/easy.txt");
 			setNumberOfLives(4);
 			break;
 		case HARD:
-			setBallSpeed(-5);
+			setBallVelocity(-5);
 			this.map = loadMap("src/levels/hard.txt"); 
 			setNumberOfLives(3);
 			break;
 		case PRO:
-			setBallSpeed(-7);
+			setBallVelocity(-7);
 			this.map = loadMap("src/levels/pro.txt");
 			setNumberOfLives(1);
 			break;

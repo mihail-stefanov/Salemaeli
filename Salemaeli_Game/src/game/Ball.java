@@ -3,12 +3,13 @@ package game;
 import javafx.scene.image.Image;
 
 public class Ball extends GraphicalObject {
+	public static double radius = 7.5;
 	private boolean released = false;
-	private int velocityX;
-	private int velocityY;
-	protected Image image;
+	private double velocityX;
+	private double velocityY;
+	private Image image;
 	
-	public Ball (int positionX, int positionY, int velocityX, int velocityY) {
+	public Ball (double positionX, double positionY, double velocityX, double velocityY) {
 		super(positionX, positionY);
 		setVelocityX(velocityX);
 		setVelocityY(velocityY);
@@ -19,23 +20,23 @@ public class Ball extends GraphicalObject {
 		return this.released;
 	}
 	
-	public void Release() {
-		this.released = true;
+	public void setAsReleased(boolean released) {
+		this.released = released;
 	}
 	
-	public int getVelocityX() {
+	public double getVelocityX() {
 		return this.velocityX;
 	}
 	
-	public void setVelocityX(int velocityX) {
+	public void setVelocityX(double velocityX) {
 		this.velocityX = velocityX;
 	}
 	
-	public int getVelocityY() {
+	public double getVelocityY() {
 		return this.velocityY;
 	}
 	
-	public void setVelocityY(int velocityY) {
+	public void setVelocityY(double velocityY) {
 		this.velocityY = velocityY;
 	}
 
