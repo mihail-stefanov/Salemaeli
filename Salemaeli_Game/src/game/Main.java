@@ -103,6 +103,7 @@ public class Main extends Application {
 		
 		beginScene.setOnMouseClicked(event -> {
 			startLoop.stop();
+			gc.setEffect(null);
 			beginGame(scene);
 		});
 	}
