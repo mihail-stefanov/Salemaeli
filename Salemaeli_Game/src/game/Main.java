@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -25,7 +26,7 @@ public class Main extends Application {
 	Canvas canvas = new Canvas(800, 600);
 	GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 
-	Level level = new Level(Difficulty.EASY);
+	Level level = new Level();
 	ArrayList<String> inputKeys = new ArrayList<String>();
 
 	ArrayList<Brick> bricks = new ArrayList<>();
@@ -79,13 +80,25 @@ public class Main extends Application {
 		startTarget.setY(175);
 		startTarget.setWidth(200);
 		startTarget.setHeight(100);
-		
+
 		Rectangle instructionTarget = new Rectangle();
 		instructionTarget.setX(250);
 		instructionTarget.setY(275);
 		instructionTarget.setWidth(200);
 		instructionTarget.setHeight(100);
-		
+
+		Rectangle levelTarget = new Rectangle();
+		levelTarget.setX(250);
+		levelTarget.setY(375);
+		levelTarget.setWidth(200);
+		levelTarget.setHeight(100);
+
+		Rectangle exitTarget = new Rectangle();
+		exitTarget.setX(250);
+		exitTarget.setY(475);
+		exitTarget.setWidth(200);
+		exitTarget.setHeight(100);
+
 		AnimationTimer startLoop = new AnimationTimer() {
 
 			@Override
@@ -111,18 +124,26 @@ public class Main extends Application {
 				graphicsContext.drawImage(coin, 200, 175);
 			}
 		});
-		
+
 		beginScene.setOnMouseClicked(event -> {
 			if (startTarget.contains(event.getX(), event.getY())) {
 				startLoop.stop();
 				graphicsContext.setEffect(null);
-				beginGame(scene);
+				beginGame(scene, Difficulty.EASY);
 			}
-			
+
 			if (instructionTarget.contains(event.getX(), event.getY())) {
 				startLoop.stop();
 				graphicsContext.setEffect(null);
 				showInstructions(scene);
+			}
+
+			if (levelTarget.contains(event.getX(), event.getY())) {
+				choosingDifficulty(scene);
+			}
+
+			if (exitTarget.contains(event.getX(), event.getY())) {
+				Platform.exit();
 			}
 		});
 	}
@@ -134,33 +155,95 @@ public class Main extends Application {
 		graphicsContext.setLineWidth(1);
 		Font titleFont = Font.font(null, FontWeight.BOLD, 30);
 		graphicsContext.setFont(titleFont);
-		
+
 		int leftArrow = 8_678;
-		String leftArrowUtf = Character.toString((char)leftArrow);
+		String leftArrowUtf = Character.toString((char) leftArrow);
 		int rigthArrow = 8_680;
-		String rigthArrowUtf = Character.toString((char)rigthArrow);
-		graphicsContext.fillText("The main point is that you have to\n"
-								+ "break all of the bricks while\n"
-								+ "collecting the coins. Your points\n"
-								+ "will increase when you collect coins.\n"
-								+ "You can move the board with the\n"
-								+ "left " 
-								+ leftArrowUtf
-								+ " and rigth " 
-								+ rigthArrowUtf
-								+ " arrows on your\n"
-								+ "keyboard. Good luck!", 100, 100);
-		
+		String rigthArrowUtf = Character.toString((char) rigthArrow);
+		graphicsContext.fillText("The main point is that you have to\n" + "break all of the bricks while\n"
+				+ "collecting the coins. Your points\n" + "will increase when you collect coins.\n"
+				+ "You can move the board with the\n" + "left " + leftArrowUtf + " and rigth " + rigthArrowUtf
+				+ " arrows on your\n" + "keyboard. Good luck!", 100, 100);
+
 		scene.setOnMouseClicked(event -> {
 			graphicsContext.setFill(Color.WHITE);
 			graphicsContext.fillRect(0, 0, 800, 600);
 			showStartScreen(scene);
 		});
 	}
-	
-	private void beginGame(Scene scene) {
+
+	private void choosingDifficulty(Scene scene) {
+		graphicsContext.setFill(Color.WHITE);
+		graphicsContext.fillRect(0, 0, 800, 600);
+
+		graphicsContext.setFill(Color.RED);
+		graphicsContext.setStroke(Color.BLACK);
+		graphicsContext.setLineWidth(3);
+		Font titleFont = Font.font(null, FontWeight.BOLD, 80);
+		graphicsContext.setFont(titleFont);
+		graphicsContext.fillText("Choose Difficulty", 100, 100);
+		graphicsContext.setLineWidth(2);
+		Font levelFont = Font.font(null, FontWeight.BOLD, 40);
+		graphicsContext.setFont(levelFont);
+		graphicsContext.fillText("Baby", 250, 200);
+		graphicsContext.fillText("Easy", 250, 300);
+		graphicsContext.fillText("Hard", 250, 400);
+		graphicsContext.fillText("Pro", 250, 500);
+
+		// Buttons
+		Rectangle babyTarget = new Rectangle();
+		babyTarget.setX(250);
+		babyTarget.setY(175);
+		babyTarget.setWidth(100);
+		babyTarget.setHeight(100);
+
+		Rectangle easyTarget = new Rectangle();
+		easyTarget.setX(250);
+		easyTarget.setY(275);
+		easyTarget.setWidth(200);
+		easyTarget.setHeight(100);
+
+		Rectangle hardTarget = new Rectangle();
+		hardTarget.setX(250);
+		hardTarget.setY(375);
+		hardTarget.setWidth(200);
+		hardTarget.setHeight(100);
+
+		Rectangle proTarget = new Rectangle();
+		proTarget.setX(250);
+		proTarget.setY(475);
+		proTarget.setWidth(200);
+		proTarget.setHeight(100);
+
+		scene.setOnMouseClicked(event -> {
+			if (babyTarget.contains(event.getX(), event.getY())) {
+				graphicsContext.setEffect(null);
+				beginGame(scene, Difficulty.BABY);
+			}
+
+			if (easyTarget.contains(event.getX(), event.getY())) {
+				graphicsContext.setEffect(null);
+				beginGame(scene, Difficulty.EASY);
+			}
+
+			if (hardTarget.contains(event.getX(), event.getY())) {
+				graphicsContext.setEffect(null);
+				beginGame(scene, Difficulty.HARD);
+			}
+
+			if (proTarget.contains(event.getX(), event.getY())) {
+				graphicsContext.setEffect(null);
+				beginGame(scene, Difficulty.PRO);
+			}
+		});
+	}
+
+	private void beginGame(Scene scene, Difficulty difficulty) {
 		Scene mainScene = scene;
 		mainScene.setCursor(Cursor.NONE); // TODO: Still has a cursor
+
+		level.setChosenDifficulty(difficulty);
+		ball.setVelocityY(level.getballVelocity());
 
 		initializeObjects();
 
@@ -170,7 +253,7 @@ public class Main extends Application {
 				inputKeys.add(code);
 			}
 		});
-		
+
 		mainScene.setOnKeyReleased(event -> inputKeys.remove(event.getCode().toString()));
 		mainScene.setOnMouseClicked(event -> ball.setAsReleased(true));
 		mainScene.setOnMouseMoved(event -> board.setPositionX((int) event.getX() - Board.width / 2));
@@ -333,7 +416,6 @@ public class Main extends Application {
 				ball.getPositionY() - Ball.radius);
 	}
 
-	
 	@Override
 	public void start(Stage window) throws Exception {
 		window.setTitle("Game Title"); // TODO: Change title

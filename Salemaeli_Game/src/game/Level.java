@@ -12,6 +12,11 @@ public class Level {
 	private int numberOfLives;
 	private String[] map;
 
+	public Level() {
+		setChosenDifficulty(Difficulty.EASY);
+		setLevelItems();
+	}
+	
 	public Level(Difficulty chosenDifficult) {
 		setChosenDifficulty(chosenDifficult);
 		setLevelItems();
@@ -25,7 +30,7 @@ public class Level {
 		this.ballVelocity = ballVelocity;
 	}
 	
-	private void setChosenDifficulty(Difficulty chosenDifficulty) {
+	public void setChosenDifficulty(Difficulty chosenDifficulty) {
 		this.chosenDifficulty = chosenDifficulty;
 	}
 	
