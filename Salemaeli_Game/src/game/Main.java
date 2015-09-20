@@ -23,10 +23,11 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	// Loading the game objects
-	Canvas canvas = new Canvas(800, 600);
+	Canvas canvas = new Canvas(800, 620);
 	GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 
 	Level level = new Level();
+	Stats gameStats = new Stats(level.getInitialNumberOfLives());
 	ArrayList<String> inputKeys = new ArrayList<String>();
 
 	ArrayList<Brick> bricks = new ArrayList<>();
@@ -332,7 +333,12 @@ public class Main extends Application {
 		boolean ballHitFloor = ball.getPositionY() > canvas.getHeight() + Ball.radius;
 
 		if (ballHitFloor) {
-			// TODO: Implement losing lives logic entry here
+			if(gameStats.getNumberOfLives() == 0){
+				//showGameOverScreen();
+			}
+
+			gameStats.setNumberOfLives(gameStats.getNumberOfLives() - 1);
+
 			ball.setAsReleased(false);
 			ball.setPositionX(board.getPositionX() + Board.width / 2);
 			ball.setPositionY(board.getPositionY() - Ball.radius);
@@ -357,7 +363,7 @@ public class Main extends Application {
 			boolean coinHitBoard = boardCoinDifferenceY < Coin.radius && boardCoinDifferenceY > -Coin.radius
 					&& boardCoinDifferenceX < Coin.radius && boardCoinDifferenceX > -(Board.width + Coin.radius);
 			if (coinHitBoard) {
-				// TODO: Implement points addition logic entry here
+				gameStats.setScore(coins.get(i).getBonusToScore());
 				coins.remove(i);
 			}
 
@@ -378,13 +384,13 @@ public class Main extends Application {
 				if (ballHitBrickVertically) {
 					ball.setVelocityY(ball.getVelocityY() * -1);
 					ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
-					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
 					bricks.remove(i);
 
 				} else {
 					ball.setVelocityX(ball.getVelocityX() * -1);
 					ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
-					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
 					bricks.remove(i);
 				}
 			}
@@ -414,6 +420,13 @@ public class Main extends Application {
 		// 8)
 		graphicsContext.drawImage(ball.getImage(), ball.getPositionX() - Ball.radius,
 				ball.getPositionY() - Ball.radius);
+
+		// Drawing the stats bar
+		String score = Integer.toString(gameStats.getScore());
+		graphicsContext.fillText("Score:" + score, 10d, 618d);
+
+		String lives = Integer.toString(gameStats.getNumberOfLives());
+		graphicsContext.fillText("Lives:" + lives, 665d, 618d);
 	}
 
 	@Override

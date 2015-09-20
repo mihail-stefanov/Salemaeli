@@ -9,7 +9,8 @@ import java.util.Scanner;
 public class Level {
 	private double ballVelocity;
 	private Difficulty chosenDifficulty;
-	private int numberOfLives;
+	private int initialNumberOfLives;
+	private int bonusToScoreByLevel;
 	private String[] map;
 
 	public Level() {
@@ -33,13 +34,21 @@ public class Level {
 	public void setChosenDifficulty(Difficulty chosenDifficulty) {
 		this.chosenDifficulty = chosenDifficulty;
 	}
-	
-	public int getNumberOfLives() {
-		return this.numberOfLives;
+
+	public int getInitialNumberOfLives() {
+		return this.initialNumberOfLives;
 	}
-	
-	private void setNumberOfLives(int numberOfLives) {
-		this.numberOfLives = numberOfLives;
+
+	private void setInitialNumberOfLives(int numberOfLives) {
+		this.initialNumberOfLives = numberOfLives;
+	}
+
+	public int getBonusToScoreByLevel() {
+		return bonusToScoreByLevel;
+	}
+
+	public void setBonusToScoreByLevel(int bonus) {
+		this.bonusToScoreByLevel = bonus;
 	}
 	
 	public String[] getMap() {
@@ -51,22 +60,26 @@ public class Level {
 		case BABY:
 			setBallVelocity(-3);
 			this.map = loadMap("src/levels/baby.txt"); // TODO: Level to be added
-			setNumberOfLives(5);
+			setInitialNumberOfLives(5);
+			setBonusToScoreByLevel(5);
 			break;
 		case EASY:
 			setBallVelocity(-4);
 			this.map = loadMap("src/levels/easy.txt");
-			setNumberOfLives(4);
+			setInitialNumberOfLives(4);
+			setBonusToScoreByLevel(10);
 			break;
 		case HARD:
 			setBallVelocity(-5);
 			this.map = loadMap("src/levels/hard.txt"); 
-			setNumberOfLives(3);
+			setInitialNumberOfLives(3);
+			setBonusToScoreByLevel(25);
 			break;
 		case PRO:
 			setBallVelocity(-7);
 			this.map = loadMap("src/levels/pro.txt");
-			setNumberOfLives(1);
+			setInitialNumberOfLives(1);
+			setBonusToScoreByLevel(50);
 			break;
 		default:
 			throw new Error("Cannot find correct level difficulty! Please check is it baby, easy, hard or pro!");

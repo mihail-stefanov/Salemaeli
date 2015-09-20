@@ -10,10 +10,12 @@ public class Coin extends GraphicalObject {
 	private double gravity = 0.1;
 	private double velocityY = -3;
 	private double velocityX = new Random().nextInt(2) - 1;
+    private int bonusToScore;
 
-	public Coin(double positionX, double positionY) {
+	public Coin(double positionX, double positionY, int bonusToScore) {
 		super(positionX, positionY);
 		setImage();
+		setBonusToScore(bonusToScore);
 	}
 	
 	public double getVelocityY() {
@@ -26,6 +28,14 @@ public class Coin extends GraphicalObject {
 	
 	public void updateVelocityY() {
 		this.velocityY += gravity;
+	}
+
+	public int getBonusToScore() {
+		return this.bonusToScore;
+	}
+
+	public void setBonusToScore(int bonus) {
+		this.bonusToScore = bonus;
 	}
 
 	@Override
