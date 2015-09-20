@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -32,8 +33,9 @@ public class Main extends Application {
 
 	ArrayList<Brick> bricks = new ArrayList<>();
 	ArrayList<Coin> coins = new ArrayList<>();
+	ArrayList<Bonus> bonuses = new ArrayList<>();
 	Board board = new Board(350, 575);
-	Ball ball = new Ball(board.getPositionX() + Board.width / 2, board.getPositionY() - Ball.radius, 1,
+	Ball ball = new Ball(board.getPositionX() + board.getWidth() / 2, board.getPositionY() - Ball.radius, 1,
 			level.getballVelocity());
 
 	public static void main(String[] args) {
@@ -257,7 +259,7 @@ public class Main extends Application {
 
 		mainScene.setOnKeyReleased(event -> inputKeys.remove(event.getCode().toString()));
 		mainScene.setOnMouseClicked(event -> ball.setAsReleased(true));
-		mainScene.setOnMouseMoved(event -> board.setPositionX((int) event.getX() - Board.width / 2));
+		mainScene.setOnMouseMoved(event -> board.setPositionX((int) event.getX() - board.getWidth() / 2));
 
 		AnimationTimer gameLoop = new AnimationTimer() {
 
@@ -298,6 +300,13 @@ public class Main extends Application {
 			coins.get(i).setPositionX(coins.get(i).getPositionX() + coins.get(i).getVelocityX());
 		}
 
+		// Moving the bonuses
+		for (int i = 0; i < bonuses.size(); i++) {
+			bonuses.get(i).updateVelocityY();
+			bonuses.get(i).setPositionY(bonuses.get(i).getPositionY() + bonuses.get(i).getVelocityY());
+			bonuses.get(i).setPositionX(bonuses.get(i).getPositionX() + bonuses.get(i).getVelocityX());
+		}
+
 		// Moving the ball if the mouse is clicked or the space is pressed
 		if (inputKeys.contains("SPACE")) {
 			ball.setAsReleased(true);
@@ -306,7 +315,7 @@ public class Main extends Application {
 			ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
 			ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
 		} else {
-			ball.setPositionX(board.getPositionX() + Board.width / 2);
+			ball.setPositionX(board.getPositionX() + board.getWidth() / 2);
 			ball.setPositionY(board.getPositionY() - Ball.radius);
 		}
 
@@ -339,8 +348,11 @@ public class Main extends Application {
 
 			gameStats.setNumberOfLives(gameStats.getNumberOfLives() - 1);
 
+			board.setNumberOfWideBonuses(0);
+			board.setWidth(board.initialBoardWidth);
 			ball.setAsReleased(false);
-			ball.setPositionX(board.getPositionX() + Board.width / 2);
+			ball.setAsFireBall(false);
+			ball.setPositionX(board.getPositionX() + board.getWidth() / 2);
 			ball.setPositionY(board.getPositionY() - Ball.radius);
 		}
 
@@ -349,10 +361,10 @@ public class Main extends Application {
 		double boardBallDifferenceX = board.getPositionX() - ball.getPositionX();
 
 		boolean ballHitBoard = boardBallDifferenceY < Ball.radius && boardBallDifferenceY > 0
-				&& boardBallDifferenceX < Ball.radius && boardBallDifferenceX > -(Board.width + Ball.radius);
+				&& boardBallDifferenceX < Ball.radius && boardBallDifferenceX > -(board.getWidth() + Ball.radius);
 		if (ballHitBoard) {
 			ball.setVelocityY(level.getballVelocity());
-			ball.setVelocityX(-1 * ((boardBallDifferenceX + Board.width / 2) / 10));
+			ball.setVelocityX(-1 * ((boardBallDifferenceX + board.getWidth() / 2) / 10));
 		}
 
 		// Coin collisions with the board
@@ -361,16 +373,39 @@ public class Main extends Application {
 			double boardCoinDifferenceX = board.getPositionX() - coins.get(i).getPositionX();
 
 			boolean coinHitBoard = boardCoinDifferenceY < Coin.radius && boardCoinDifferenceY > -Coin.radius
-					&& boardCoinDifferenceX < Coin.radius && boardCoinDifferenceX > -(Board.width + Coin.radius);
+					&& boardCoinDifferenceX < Coin.radius && boardCoinDifferenceX > -(board.getWidth() + Coin.radius);
 			if (coinHitBoard) {
 				gameStats.setScore(coins.get(i).getBonusToScore());
 				coins.remove(i);
 			}
+		}
 
+		// Bonuses collisions with the board
+		for (int i = 0; i < bonuses.size(); i++) {
+			double boardBonusDifferenceY = board.getPositionY() - bonuses.get(i).getPositionY();
+			double boardBonusDifferenceX = board.getPositionX() - bonuses.get(i).getPositionX();
+
+			boolean bonusHitBoard = boardBonusDifferenceY < Bonus.bonusHeight && boardBonusDifferenceY > -Bonus.bonusHeight
+					&& boardBonusDifferenceX < Bonus.bonusWidth && boardBonusDifferenceX > -(board.getWidth() + Bonus.bonusWidth);
+			if (bonusHitBoard) {
+				if (bonuses.get(i) instanceof LifeBonus){
+					((LifeBonus) bonuses.get(i)).takeEffect(gameStats);
+				}
+				else if(bonuses.get(i) instanceof WideBonus){
+					((WideBonus) bonuses.get(i)).takeEffect(board);
+				}
+				else if(bonuses.get(i) instanceof FireBall){
+					((FireBall) bonuses.get(i)).takeEffect(ball);
+				}
+
+				bonuses.remove(i);
+			}
 		}
 
 		// Ball collisions with bricks
 		for (int i = 0; i < bricks.size(); i++) {
+			double bonusTreshold = new Random().nextDouble();
+
 			double brickBallDifferenceY = bricks.get(i).getPositionY() - ball.getPositionY();
 			double brickBallDifferenceX = bricks.get(i).getPositionX() - ball.getPositionX();
 
@@ -384,14 +419,48 @@ public class Main extends Application {
 				if (ballHitBrickVertically) {
 					ball.setVelocityY(ball.getVelocityY() * -1);
 					ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
-					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
-					bricks.remove(i);
+					if(bonusTreshold >= 0.2) {
+						coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
+					}
+					else if(bonusTreshold < 0.2 && bonusTreshold >= 0.13){
+						bonuses.add(new LifeBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					else if(bonusTreshold < 0.13 && bonusTreshold >= 0.06){
+						bonuses.add(new WideBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					else if(bonusTreshold < 0.06){
+						bonuses.add(new FireBall(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					if(ball.isFireBall()){
+						bricks.remove(i); // TODO implement fireball behavior
+					}
+					else {
+						bricks.remove(i);
+					}
 
 				} else {
 					ball.setVelocityX(ball.getVelocityX() * -1);
 					ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
-					coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
-					bricks.remove(i);
+					if(bonusTreshold >= 0.2) {
+						coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
+					}
+					else if(bonusTreshold < 0.2 && bonusTreshold >= 0.13){
+						bonuses.add(new LifeBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					else if(bonusTreshold < 0.13 && bonusTreshold >= 0.06){
+						bonuses.add(new WideBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					else if(bonusTreshold < 0.06){
+						bonuses.add(new FireBall(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					if(ball.isFireBall()){
+				//		bricks.remove(i-1); // TODO implement multiple brick destruction when "fireBall"
+						bricks.remove(i);
+					//	bricks.remove(i+1);
+					}
+					else {
+						bricks.remove(i);
+					}
 				}
 			}
 		}
@@ -408,12 +477,18 @@ public class Main extends Application {
 		}
 
 		// Drawing the board
-		graphicsContext.drawImage(board.getImage(), board.getPositionX(), board.getPositionY());
+			graphicsContext.drawImage(board.getImage(), board.getPositionX(), board.getPositionY());
 
 		// Drawing the coins
 		for (int i = 0; i < coins.size(); i++) {
 			graphicsContext.drawImage(coins.get(i).getImage(), coins.get(i).getPositionX() - Coin.radius,
 					coins.get(i).getPositionY() - Coin.radius);
+		}
+
+		// Drawing the bonuses
+		for (int i = 0; i < bonuses.size(); i++) {
+			graphicsContext.drawImage(bonuses.get(i).getImage(), bonuses.get(i).getPositionX() - Bonus.bonusWidth,
+					bonuses.get(i).getPositionY() - Bonus.bonusHeight);
 		}
 
 		// Drawing the ball (creating an offset equal to the ball's radius, i.e.
