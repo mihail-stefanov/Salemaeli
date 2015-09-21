@@ -14,7 +14,7 @@ public class Stats {
     }
 
     public void setNumberOfLives(int numberOfLives) {
-        if(numberOfLives < 0){
+        if(numberOfLives < 0) {
             throw new IllegalArgumentException("Number of lives must be a positive integer.");
         }
         this.numberOfLives = numberOfLives;
