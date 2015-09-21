@@ -652,8 +652,10 @@ public class Main extends Application {
 		Group root = new Group();
 		Scene mainScene = new Scene(root);
 		window.setScene(mainScene);
+		window.getIcons().add(new Image("images/wall32.PNG"));
 		root.getChildren().add(canvas);
 		window.show();
+
 
 		showStartScreen(mainScene);
 	}
