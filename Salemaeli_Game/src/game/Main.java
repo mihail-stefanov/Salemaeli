@@ -573,7 +573,7 @@ public class Main extends Application {
 		field.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent e) {
-				if (e.getCode() == KeyCode.ENTER) {
+				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.SPACE) {
 					String username = field.getText();
 					showHighestScores(scene, username);
 					newStage.close();
