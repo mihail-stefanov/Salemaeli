@@ -2,11 +2,12 @@ package game;
 
 import javafx.scene.image.Image;
 
-public class LifeBonus extends Bonus{
+public class LosePointsPenalty extends Penalty {
 
+    private int penaltyToScore = -30;
     private Image image;
 
-    public LifeBonus(double positionX, double positionY) {
+    public LosePointsPenalty(double positionX, double positionY) {
         super(positionX, positionY);
         setImage();
     }
@@ -18,11 +19,10 @@ public class LifeBonus extends Bonus{
 
     @Override
     protected void setImage() {
-        this.image = new Image("images/lifeBonus.png");
+        this.image = new Image("images/minusCoin.png");
     }
 
     public void takeEffect(Stats gameStats){
-        gameStats.setNumberOfLives(gameStats.getNumberOfLives() + 1);
+        gameStats.setScore(penaltyToScore);
     }
 }
-
