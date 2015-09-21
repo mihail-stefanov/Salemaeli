@@ -1,5 +1,6 @@
 package game;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 import javafx.animation.AnimationTimer;
@@ -54,6 +55,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -702,6 +705,12 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage window) throws Exception {
+		final URL resource = getClass().getResource("/sounds/PinguinDance.mp4");
+		final Media media = new Media(resource.toString());
+		final MediaPlayer mediaPlayer = new MediaPlayer(media);
+	    mediaPlayer.play();
+		//  mediaPlayer.setMute(true);
+		
 		window.setTitle("Break&Collect"); 
 		Group root = new Group();
 		Scene mainScene = new Scene(root);
