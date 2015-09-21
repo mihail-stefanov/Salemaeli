@@ -544,9 +544,7 @@ public class Main extends Application {
 					}
 
 					if(ball.isFireBall()){
-				//		bricks.remove(i-1); // TODO implement multiple brick destruction when "fireBall"
-						bricks.remove(i);
-					//	bricks.remove(i+1);
+						bricks.remove(i); // TODO implement fireball behavior
 					}
 					else {
 						bricks.remove(i);
