@@ -2,11 +2,9 @@ package game;
 
 import java.util.ArrayList;
 import java.util.Random;
-
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -14,11 +12,53 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
+import java.util.Random;
+import javax.sound.midi.Synthesizer;
+import javafx.animation.AnimationTimer;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.effect.InnerShadow;
+import javafx.scene.image.Image;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.Popup;
+import javafx.stage.PopupBuilder;
+import javafx.stage.Stage;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -31,6 +71,7 @@ public class Main extends Application {
 	Stats gameStats = new Stats(level.getInitialNumberOfLives());
 	ArrayList<String> inputKeys = new ArrayList<String>();
 
+	boolean gameEnded = false;
 	ArrayList<Brick> bricks = new ArrayList<>();
 	ArrayList<Coin> coins = new ArrayList<>();
 	ArrayList<Bonus> bonuses = new ArrayList<>();
@@ -166,7 +207,7 @@ public class Main extends Application {
 		graphicsContext.fillText("The main point is that you have to\n" + "break all of the bricks while\n"
 				+ "collecting the coins. Your points\n" + "will increase when you collect coins.\n"
 				+ "You can move the board with the\n" + "left " + leftArrowUtf + " and rigth " + rigthArrowUtf
-				+ " arrows on your\n" + "keyboard. Good luck!", 100, 100);
+				+ " arrows on your\n" + "keyboard. Good luck!", 150, 150);
 
 		scene.setOnMouseClicked(event -> {
 			graphicsContext.setFill(Color.WHITE);
@@ -241,9 +282,9 @@ public class Main extends Application {
 		});
 	}
 
-	private void beginGame(Scene scene, Difficulty difficulty) {
+	public void beginGame(Scene scene, Difficulty difficulty) {
 		Scene mainScene = scene;
-		mainScene.setCursor(Cursor.NONE); // TODO: Still has a cursor
+		//mainScene.setCursor(Cursor.NONE); 
 
 		level.setChosenDifficulty(difficulty);
 		ball.setVelocityY(level.getballVelocity());
@@ -261,21 +302,18 @@ public class Main extends Application {
 		mainScene.setOnMouseClicked(event -> ball.setAsReleased(true));
 		mainScene.setOnMouseMoved(event -> board.setPositionX((int) event.getX() - board.getWidth() / 2));
 
-		AnimationTimer gameLoop = new AnimationTimer() {
+		new AnimationTimer() {
 
 			@Override
 			public void handle(long now) {
-				updateObjects();
+				updateObjects(scene);				
 				drawObjects();
+						
+				if(gameEnded) {
+					this.stop();
+				}
 			}
-		};
-
-		gameLoop.start();
-	}
-
-	private void showGameOverScreen(Scene scene) {
-		// TODO: To be implemented (entered into after calling
-		// "gameloop.stop();")
+		}.start();
 	}
 
 	private void initializeObjects() {
@@ -289,9 +327,9 @@ public class Main extends Application {
 		}
 	}
 
-	private void updateObjects() {
+	private void updateObjects(Scene scene) {
 
-		detectAndResolveCollisions();
+		detectAndResolveCollisions(scene);
 
 		// Moving the coins
 		for (int i = 0; i < coins.size(); i++) {
@@ -323,7 +361,7 @@ public class Main extends Application {
 		board.move(inputKeys);
 	}
 
-	private void detectAndResolveCollisions() {
+	private void detectAndResolveCollisions(Scene scene) {
 
 		// Ball collisions with the walls
 		boolean ballHitWalls = ball.getPositionX() < Ball.radius
@@ -342,11 +380,13 @@ public class Main extends Application {
 		boolean ballHitFloor = ball.getPositionY() > canvas.getHeight() + Ball.radius;
 
 		if (ballHitFloor) {
-			if(gameStats.getNumberOfLives() == 0){
-				//showGameOverScreen();
+			
+			try {
+				gameStats.setNumberOfLives(gameStats.getNumberOfLives() - 1);
+			} catch (IllegalArgumentException e) {
+				gameEnded = true;
+				showGameOverScreen(scene);
 			}
-
-			gameStats.setNumberOfLives(gameStats.getNumberOfLives() - 1);
 
 			board.setNumberOfWideBonuses(0);
 			board.setWidth(board.initialBoardWidth);
@@ -504,9 +544,111 @@ public class Main extends Application {
 		graphicsContext.fillText("Lives:" + lives, 665d, 618d);
 	}
 
+	private void showGameOverScreen(Scene scene) {
+		Scene gameOverScene = scene;
+
+		graphicsContext.setEffect(null);
+		graphicsContext.clearRect(0, 0, 800, 620);
+		graphicsContext.setFill(Color.WHITE);
+		Image gameOver = new Image("images/game_over.png");
+		graphicsContext.drawImage(gameOver, 0, 0);
+
+		gameOverScene.setOnMouseClicked(event -> {
+			graphicsContext.fillRect(0, 0, 800, 620);
+			showStage(scene);
+		});
+	}
+	
+	public void showStage(Scene scene) {
+		Stage newStage = new Stage();
+		VBox comp = new VBox();
+		TextField field = new TextField("");
+		comp.getChildren().add(field);
+
+		Scene additionalScene = new Scene(comp, 400, 28);
+		newStage.setTitle("Enter your username here:");
+		newStage.setScene(additionalScene);
+		
+		String username = "";
+		field.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent e) {
+				if (e.getCode() == KeyCode.ENTER) {
+					String username = field.getText();
+					showHighestScores(scene, username);
+					newStage.close();
+				}
+			}
+		});
+			
+		newStage.show();
+		}
+	
+	private void showHighestScores(Scene scene, String username) {
+		String line = FileManeger.ReadFromFile();
+		String[] highestScoresInput = generatingNewHighestScores(line, username);
+		String output = String.join(" ", highestScoresInput);
+		FileManeger.WriteToFile(output);
+
+		String textResult = generatingTextForConsole(highestScoresInput);
+		graphicsContext.setFill(Color.RED);
+		graphicsContext.setLineWidth(1);
+		Font titleFont = Font.font(null, FontWeight.BOLD, 50);
+		graphicsContext.setFont(titleFont);
+		graphicsContext.fillText("High scores!", 250, 200);
+		
+		Font scoreFont = Font.font(null, FontWeight.BOLD, 30);
+		graphicsContext.setFont(scoreFont);
+		graphicsContext.fillText(textResult, 290, 300);
+
+		scene.setOnMouseClicked(event -> {
+			Platform.exit();
+		});
+	}
+
+	private String generatingTextForConsole(String[] highestScoresInput) {
+		StringBuilder result = new StringBuilder("1. ");
+
+		int position = 1;
+		for (int i = 0; i < highestScoresInput.length; i++) {
+			result.append(highestScoresInput[i]);
+
+			if (i % 2 == 0) {
+				result.append(" - ");
+			} else {
+				if (position != 5) {
+					result.append("\n" + ++position + ". ");
+				} 
+			}
+		}
+
+		return result.toString();
+	}
+
+	private String[] generatingNewHighestScores(String line, String username) {
+		Random rand = new Random();
+		int score = rand.nextInt(100);
+		String[] highestScoresInput = line.split(" ");
+
+		for (int i = 1; i < highestScoresInput.length; i += 2) {
+			if (score > Integer.parseInt(highestScoresInput[i])) {
+				for (int j = highestScoresInput.length - 1; j >= i + 2; j -= 2) {
+					highestScoresInput[j] = highestScoresInput[j - 2];
+					highestScoresInput[j - 1] = highestScoresInput[j - 3];
+				}
+
+				highestScoresInput[i] = Integer.toString(score);
+				highestScoresInput[i - 1] = username;
+				break;
+			}
+		}
+
+		return highestScoresInput;
+	}	
+	
 	@Override
 	public void start(Stage window) throws Exception {
-		window.setTitle("Game Title"); // TODO: Change title
+		window.setTitle("Break&Collect"); 
 		Group root = new Group();
 		Scene mainScene = new Scene(root);
 		window.setScene(mainScene);

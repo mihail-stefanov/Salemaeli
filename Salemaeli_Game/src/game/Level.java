@@ -33,6 +33,7 @@ public class Level {
 	
 	public void setChosenDifficulty(Difficulty chosenDifficulty) {
 		this.chosenDifficulty = chosenDifficulty;
+		setLevelItems();
 	}
 
 	public int getInitialNumberOfLives() {
