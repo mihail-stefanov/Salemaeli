@@ -3,7 +3,7 @@ package game.play.fallingObjects;
 import game.play.Stats;
 import javafx.scene.image.Image;
 
-public class LosePointsPenalty extends Penalty {
+public class LosePointsPenalty extends Artifact {
 
     private int penaltyToScore = -30;
     private Image image;

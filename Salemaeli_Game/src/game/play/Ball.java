@@ -1,6 +1,17 @@
 package game.play;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import game.*;
+import game.play.fallingObjects.Coin;
+import game.play.fallingObjects.FallingObject;
+import game.play.fallingObjects.FireBallBonus;
+import game.play.fallingObjects.LifeBonus;
+import game.play.fallingObjects.LifePenalty;
+import game.play.fallingObjects.LosePointsPenalty;
+import game.play.fallingObjects.WideBonus;
+import game.play.fallingObjects.WidePenalty;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 
@@ -110,5 +121,65 @@ public class Ball extends GraphicalObject {
 			this.setVelocityX(-1 * ((boardBallDifferenceX + board.getWidth() / 2) / 10));
 		}
 		
+	}
+
+	public void move() {
+		this.setPositionX(this.getPositionX() + this.getVelocityX());
+		this.setPositionY(this.getPositionY() + this.getVelocityY());
+	}
+
+	public boolean detectAndResolveCollisionsWithBrick(Brick brick, ArrayList<FallingObject> fallingObjects, Level level) {
+		
+		// Threshold for coin or bonus or penalty generation
+		double objectTreshold = new Random().nextDouble(); 
+
+		double brickBallDifferenceY = brick.getPositionY() - this.getPositionY();
+		double brickBallDifferenceX = brick.getPositionX() - this.getPositionX();
+
+		boolean ballHitBrick = brickBallDifferenceY > -(Brick.height + Ball.radius)
+				&& brickBallDifferenceY < Ball.radius && brickBallDifferenceX > -(Brick.width + Ball.radius)
+				&& brickBallDifferenceX < Ball.radius;
+
+		double newObjectX = brick.getPositionX() + 20;
+		double newObjectY = brick.getPositionY() + 10;
+		if (ballHitBrick) {
+			boolean ballHitBrickVertically = brickBallDifferenceX < Ball.radius / 2 && 
+												brickBallDifferenceX > -(Brick.width + Ball.radius / 2);
+			
+			if (!this.isFireBall()) {
+				if (ballHitBrickVertically) {
+					this.setVelocityY(this.getVelocityY() * -1);
+					this.setPositionY(this.getPositionY() + this.getVelocityY());
+				} 
+				else {
+					this.setVelocityX(this.getVelocityX() * -1);
+					this.setPositionX(this.getPositionX() + this.getVelocityX());
+				}
+			} 
+			
+			if (objectTreshold >= 0.17) {
+				fallingObjects.add(new Coin(newObjectX, newObjectY,	level.getBonusToScoreByLevel()));
+			} 
+			else if (objectTreshold < 0.17 && objectTreshold >= 0.15) {
+				fallingObjects.add(new FireBallBonus(newObjectX, newObjectY));
+			} 
+			else if (objectTreshold < 0.15 && objectTreshold >= 0.12) {
+				fallingObjects.add(new WideBonus(newObjectX, newObjectY));
+			} 
+			else if (objectTreshold < 0.12 && objectTreshold >= 0.09) {
+				fallingObjects.add(new LifeBonus(newObjectX, newObjectY));
+			} 
+			else if (objectTreshold < 0.09 && objectTreshold >= 0.06) {
+				fallingObjects.add(new LifePenalty(newObjectX, newObjectY));
+			} 
+			else if (objectTreshold < 0.06 && objectTreshold >= 0.03) {
+				fallingObjects.add(new WidePenalty(newObjectX, newObjectY));
+			} 
+			else if (objectTreshold < 0.03) {
+				fallingObjects.add(new LosePointsPenalty(newObjectX, newObjectY));
+			}
+		}
+		
+		return ballHitBrick;
 	}
 }

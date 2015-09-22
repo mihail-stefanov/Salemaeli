@@ -3,11 +3,11 @@ package game.play.fallingObjects;
 import game.play.Ball;
 import javafx.scene.image.Image;
 
-public class FireBall extends Bonus{
+public class FireBallBonus extends Artifact{
 
     private Image image;
 
-    public FireBall(double positionX, double positionY) {
+    public FireBallBonus(double positionX, double positionY) {
         super(positionX, positionY);
         setImage();
     }

@@ -3,7 +3,7 @@ package game.play.fallingObjects;
 import game.play.Board;
 import javafx.scene.image.Image;
 
-public class WidePenalty extends Penalty{
+public class WidePenalty extends Artifact{
 
     public static double widthBonus = 40;
     private Image image;

@@ -3,7 +3,7 @@ package game.play.fallingObjects;
 import game.play.Stats;
 import javafx.scene.image.Image;
 
-public class LifeBonus extends Bonus{
+public class LifeBonus extends Artifact {
 
     private Image image;
 
