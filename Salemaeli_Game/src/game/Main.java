@@ -18,51 +18,13 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import java.util.Random;
-import javax.sound.midi.Synthesizer;
-import javafx.animation.AnimationTimer;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
-import javafx.scene.Cursor;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.effect.InnerShadow;
-import javafx.scene.image.Image;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.stage.Popup;
-import javafx.stage.PopupBuilder;
-import javafx.stage.Stage;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
 public class Main extends Application {
 
@@ -83,6 +45,12 @@ public class Main extends Application {
 	Ball ball = new Ball(board.getPositionX() + board.getWidth() / 2, board.getPositionY() - Ball.radius, 1,
 			level.getballVelocity());
 
+	// Images
+	Image blueBrick = new Image("images/brick_blue.png");
+	Image tealBrick = new Image("images/brick_teal.png");
+	Image greenBrick = new Image("images/brick_green.png");
+	Image magentaBrick = new Image("images/brick_magenta.png");
+	
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -115,13 +83,6 @@ public class Main extends Application {
 		graphicsContext.fillText("Choose Difficulty", 250, 400);
 		graphicsContext.fillText("Exit", 250, 500);
 
-		// Images
-		Image blueBrick = new Image("images/brick_blue.png");
-		Image tealBrick = new Image("images/brick_teal.png");
-		Image greenBrick = new Image("images/brick_green.png");
-		Image magentaBrick = new Image("images/brick_magenta.png");
-		Image coin = new Image("images/coin.png");
-
 		// Buttons
 		Rectangle startTarget = new Rectangle();
 		startTarget.setX(250);
@@ -147,41 +108,18 @@ public class Main extends Application {
 		exitTarget.setWidth(200);
 		exitTarget.setHeight(100);
 
-		AnimationTimer startLoop = new AnimationTimer() {
-
-			@Override
-			public void handle(long now) {
-				graphicsContext.drawImage(blueBrick, 200, 175);
-				graphicsContext.drawImage(tealBrick, 200, 275);
-				graphicsContext.drawImage(greenBrick, 200, 375);
-				graphicsContext.drawImage(magentaBrick, 200, 475);
-			}
-		};
-		startLoop.start();
-
-		beginScene.setOnMouseEntered(event -> {
-			if (startTarget.contains(event.getX(), event.getY())) {
-				graphicsContext.clearRect(200, 175, 40, 20);
-				graphicsContext.drawImage(blueBrick, 200, 175);
-			}
-		});
-
-		beginScene.setOnMouseExited(event -> {
-			if (startTarget.contains(event.getX(), event.getY())) {
-				graphicsContext.clearRect(200, 175, 40, 20);
-				graphicsContext.drawImage(coin, 200, 175);
-			}
-		});
+		graphicsContext.drawImage(blueBrick, 200, 175);
+		graphicsContext.drawImage(tealBrick, 200, 275);
+		graphicsContext.drawImage(greenBrick, 200, 375);
+		graphicsContext.drawImage(magentaBrick, 200, 475);
 
 		beginScene.setOnMouseClicked(event -> {
 			if (startTarget.contains(event.getX(), event.getY())) {
-				startLoop.stop();
 				graphicsContext.setEffect(null);
 				beginGame(scene, Difficulty.EASY);
 			}
 
 			if (instructionTarget.contains(event.getX(), event.getY())) {
-				startLoop.stop();
 				graphicsContext.setEffect(null);
 				showInstructions(scene);
 			}
@@ -238,6 +176,11 @@ public class Main extends Application {
 		graphicsContext.fillText("Hard", 250, 400);
 		graphicsContext.fillText("Pro", 250, 500);
 
+		graphicsContext.drawImage(blueBrick, 200, 175);
+		graphicsContext.drawImage(tealBrick, 200, 275);
+		graphicsContext.drawImage(greenBrick, 200, 375);
+		graphicsContext.drawImage(magentaBrick, 200, 475);
+		
 		// Buttons
 		Rectangle babyTarget = new Rectangle();
 		babyTarget.setX(250);
@@ -288,7 +231,7 @@ public class Main extends Application {
 
 	public void beginGame(Scene scene, Difficulty difficulty) {
 		Scene mainScene = scene;
-		//mainScene.setCursor(Cursor.NONE); 
+		// mainScene.setCursor(Cursor.NONE);
 
 		level.setChosenDifficulty(difficulty);
 		ball.setVelocityY(level.getballVelocity());
@@ -310,10 +253,10 @@ public class Main extends Application {
 
 			@Override
 			public void handle(long now) {
-				updateObjects(scene);				
+				updateObjects(scene);
 				drawObjects();
-						
-				if(gameEnded) {
+
+				if (gameEnded) {
 					this.stop();
 				}
 			}
@@ -391,7 +334,7 @@ public class Main extends Application {
 		boolean ballHitFloor = ball.getPositionY() > canvas.getHeight() + Ball.radius;
 
 		if (ballHitFloor) {
-			
+
 			try {
 				gameStats.setNumberOfLives(gameStats.getNumberOfLives() - 1);
 			} catch (IllegalArgumentException e) {
@@ -436,16 +379,15 @@ public class Main extends Application {
 			double boardBonusDifferenceY = board.getPositionY() - bonuses.get(i).getPositionY();
 			double boardBonusDifferenceX = board.getPositionX() - bonuses.get(i).getPositionX();
 
-			boolean bonusHitBoard = boardBonusDifferenceY < Bonus.bonusHeight && boardBonusDifferenceY > -Bonus.bonusHeight
-					&& boardBonusDifferenceX < Bonus.bonusWidth && boardBonusDifferenceX > -(board.getWidth() + Bonus.bonusWidth);
+			boolean bonusHitBoard = boardBonusDifferenceY < Bonus.bonusHeight
+					&& boardBonusDifferenceY > -Bonus.bonusHeight && boardBonusDifferenceX < Bonus.bonusWidth
+					&& boardBonusDifferenceX > -(board.getWidth() + Bonus.bonusWidth);
 			if (bonusHitBoard) {
-				if (bonuses.get(i) instanceof LifeBonus){
+				if (bonuses.get(i) instanceof LifeBonus) {
 					((LifeBonus) bonuses.get(i)).takeEffect(gameStats);
-				}
-				else if(bonuses.get(i) instanceof WideBonus){
+				} else if (bonuses.get(i) instanceof WideBonus) {
 					((WideBonus) bonuses.get(i)).takeEffect(board);
-				}
-				else if(bonuses.get(i) instanceof FireBall){
+				} else if (bonuses.get(i) instanceof FireBall) {
 					((FireBall) bonuses.get(i)).takeEffect(ball);
 				}
 
@@ -458,16 +400,16 @@ public class Main extends Application {
 			double boardPenaltyDifferenceY = board.getPositionY() - penalties.get(i).getPositionY();
 			double boardPenaltyDifferenceX = board.getPositionX() - penalties.get(i).getPositionX();
 
-			boolean penaltyHitBoard = boardPenaltyDifferenceY < Penalty.penaltyHeight && boardPenaltyDifferenceY > - Penalty.penaltyHeight
-					&& boardPenaltyDifferenceX < Penalty.penaltyWidth && boardPenaltyDifferenceX > -(board.getWidth() + Penalty.penaltyWidth);
+			boolean penaltyHitBoard = boardPenaltyDifferenceY < Penalty.penaltyHeight
+					&& boardPenaltyDifferenceY > -Penalty.penaltyHeight
+					&& boardPenaltyDifferenceX < Penalty.penaltyWidth
+					&& boardPenaltyDifferenceX > -(board.getWidth() + Penalty.penaltyWidth);
 			if (penaltyHitBoard) {
-				if (penalties.get(i) instanceof LifePenalty){
+				if (penalties.get(i) instanceof LifePenalty) {
 					((LifePenalty) penalties.get(i)).takeEffect(gameStats);
-				}
-				else if(penalties.get(i) instanceof WidePenalty){
+				} else if (penalties.get(i) instanceof WidePenalty) {
 					((WidePenalty) penalties.get(i)).takeEffect(board);
-				}
-				else if(penalties.get(i) instanceof LosePointsPenalty){
+				} else if (penalties.get(i) instanceof LosePointsPenalty) {
 					((LosePointsPenalty) penalties.get(i)).takeEffect(gameStats);
 				}
 
@@ -477,7 +419,10 @@ public class Main extends Application {
 
 		// Ball collisions with bricks
 		for (int i = 0; i < bricks.size(); i++) {
-			double objectTreshold = new Random().nextDouble(); // Treshold for coin or bonus or penalty generation.
+			double objectTreshold = new Random().nextDouble(); // Treshold for
+																// coin or bonus
+																// or penalty
+																// generation.
 
 			double brickBallDifferenceY = bricks.get(i).getPositionY() - ball.getPositionY();
 			double brickBallDifferenceX = bricks.get(i).getPositionX() - ball.getPositionX();
@@ -492,64 +437,62 @@ public class Main extends Application {
 				if (ballHitBrickVertically) {
 					ball.setVelocityY(ball.getVelocityY() * -1);
 					ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
-					if(objectTreshold >= 0.18) {
-						coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
-					}
-					else if(objectTreshold < 0.18 && objectTreshold >= 0.15){
-						bonuses.add(new LifeBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.15 && objectTreshold >= 0.12){
-						bonuses.add(new WideBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.12 && objectTreshold >= 0.09){
-						bonuses.add(new FireBall(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.09 && objectTreshold >= 0.06){
-						penalties.add(new LifePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.06 && objectTreshold >= 0.03){
-						penalties.add(new WidePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.03){
-						penalties.add(new LosePointsPenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					if (objectTreshold >= 0.18) {
+						coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10,
+								level.getBonusToScoreByLevel()));
+					} else if (objectTreshold < 0.18 && objectTreshold >= 0.15) {
+						bonuses.add(
+								new LifeBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.15 && objectTreshold >= 0.12) {
+						bonuses.add(
+								new WideBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.12 && objectTreshold >= 0.09) {
+						bonuses.add(new FireBall(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.09 && objectTreshold >= 0.06) {
+						penalties.add(
+								new LifePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.06 && objectTreshold >= 0.03) {
+						penalties.add(
+								new WidePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.03) {
+						penalties.add(new LosePointsPenalty(bricks.get(i).getPositionX() + 20,
+								bricks.get(i).getPositionY() + 10));
 					}
 
-					if(ball.isFireBall()){
+					if (ball.isFireBall()) {
 						bricks.remove(i); // TODO implement fireball behavior
-					}
-					else {
+					} else {
 						bricks.remove(i);
 					}
 
 				} else {
 					ball.setVelocityX(ball.getVelocityX() * -1);
 					ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
-					if(objectTreshold >= 0.18) {
-						coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
-					}
-					else if(objectTreshold < 0.18 && objectTreshold >= 0.15){
-						bonuses.add(new LifeBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.15 && objectTreshold >= 0.12){
-						bonuses.add(new WideBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.12 && objectTreshold >= 0.09){
-						bonuses.add(new FireBall(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.09 && objectTreshold >= 0.06){
-						penalties.add(new LifePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.06 && objectTreshold >= 0.03){
-						penalties.add(new WidePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
-					}
-					else if(objectTreshold < 0.03){
-						penalties.add(new LosePointsPenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					if (objectTreshold >= 0.18) {
+						coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10,
+								level.getBonusToScoreByLevel()));
+					} else if (objectTreshold < 0.18 && objectTreshold >= 0.15) {
+						bonuses.add(
+								new LifeBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.15 && objectTreshold >= 0.12) {
+						bonuses.add(
+								new WideBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.12 && objectTreshold >= 0.09) {
+						bonuses.add(new FireBall(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.09 && objectTreshold >= 0.06) {
+						penalties.add(
+								new LifePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.06 && objectTreshold >= 0.03) {
+						penalties.add(
+								new WidePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10));
+					} else if (objectTreshold < 0.03) {
+						penalties.add(new LosePointsPenalty(bricks.get(i).getPositionX() + 20,
+								bricks.get(i).getPositionY() + 10));
 					}
 
-					if(ball.isFireBall()){
+					if (ball.isFireBall()) {
 						bricks.remove(i); // TODO implement fireball behavior
-					}
-					else {
+					} else {
 						bricks.remove(i);
 					}
 				}
@@ -568,7 +511,7 @@ public class Main extends Application {
 		}
 
 		// Drawing the board
-			graphicsContext.drawImage(board.getImage(), board.getPositionX(), board.getPositionY());
+		graphicsContext.drawImage(board.getImage(), board.getPositionX(), board.getPositionY());
 
 		// Drawing the coins
 		for (int i = 0; i < coins.size(); i++) {
@@ -584,7 +527,8 @@ public class Main extends Application {
 
 		// Drawing the penalties
 		for (int i = 0; i < penalties.size(); i++) {
-			graphicsContext.drawImage(penalties.get(i).getImage(), penalties.get(i).getPositionX() - Penalty.penaltyWidth,
+			graphicsContext.drawImage(penalties.get(i).getImage(),
+					penalties.get(i).getPositionX() - Penalty.penaltyWidth,
 					penalties.get(i).getPositionY() - Penalty.penaltyHeight);
 		}
 
@@ -607,7 +551,7 @@ public class Main extends Application {
 		graphicsContext.setEffect(null);
 		graphicsContext.clearRect(0, 0, 800, 620);
 		graphicsContext.setFill(Color.WHITE);
-		Image gameOver = new Image("images/game_over.png");
+		Image gameOver = new Image("images/game_over.png"); // TODO: Image not showing
 		graphicsContext.drawImage(gameOver, 0, 0);
 
 		gameOverScene.setOnMouseClicked(event -> {
@@ -615,7 +559,7 @@ public class Main extends Application {
 			showStage(scene);
 		});
 	}
-	
+
 	public void showStage(Scene scene) {
 		Stage newStage = new Stage();
 		VBox comp = new VBox();
@@ -625,7 +569,7 @@ public class Main extends Application {
 		Scene additionalScene = new Scene(comp, 400, 28);
 		newStage.setTitle("Enter your username here:");
 		newStage.setScene(additionalScene);
-		
+
 		String username = "";
 		field.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
@@ -637,10 +581,10 @@ public class Main extends Application {
 				}
 			}
 		});
-			
+
 		newStage.show();
-		}
-	
+	}
+
 	private void showHighestScores(Scene scene, String username) {
 		String line = FileManeger.ReadFromFile();
 		String[] highestScoresInput = generatingNewHighestScores(line, username);
@@ -653,7 +597,7 @@ public class Main extends Application {
 		Font titleFont = Font.font(null, FontWeight.BOLD, 50);
 		graphicsContext.setFont(titleFont);
 		graphicsContext.fillText("High scores!", 250, 200);
-		
+
 		Font scoreFont = Font.font(null, FontWeight.BOLD, 30);
 		graphicsContext.setFont(scoreFont);
 		graphicsContext.fillText(textResult, 290, 300);
@@ -675,7 +619,7 @@ public class Main extends Application {
 			} else {
 				if (position != 5) {
 					result.append("\n" + ++position + ". ");
-				} 
+				}
 			}
 		}
 
@@ -683,8 +627,7 @@ public class Main extends Application {
 	}
 
 	private String[] generatingNewHighestScores(String line, String username) {
-		Random rand = new Random();
-		int score = rand.nextInt(100);
+		int score = gameStats.getScore();
 		String[] highestScoresInput = line.split(" ");
 
 		for (int i = 1; i < highestScoresInput.length; i += 2) {
@@ -701,24 +644,23 @@ public class Main extends Application {
 		}
 
 		return highestScoresInput;
-	}	
-	
+	}
+
 	@Override
 	public void start(Stage window) throws Exception {
 		final URL resource = getClass().getResource("/sounds/PinguinDance.mp4");
 		final Media media = new Media(resource.toString());
 		final MediaPlayer mediaPlayer = new MediaPlayer(media);
-	    mediaPlayer.play();
-		//  mediaPlayer.setMute(true);
-		
-		window.setTitle("Break&Collect"); 
+		mediaPlayer.play();
+		// mediaPlayer.setMute(true);
+
+		window.setTitle("Break&Collect");
 		Group root = new Group();
 		Scene mainScene = new Scene(root);
 		window.setScene(mainScene);
 		window.getIcons().add(new Image("images/wall32.PNG"));
 		root.getChildren().add(canvas);
 		window.show();
-
 
 		showStartScreen(mainScene);
 	}
