@@ -491,10 +491,21 @@ public class Main extends Application {
 		graphicsContext.setEffect(null);
 		graphicsContext.clearRect(0, 0, 800, 620);
 		graphicsContext.setFill(Color.WHITE);
-		Image gameOver = new Image("images/game_over.png"); // TODO: Image not showing
-		graphicsContext.drawImage(gameOver, 0, 0);
+		Image gameOver = new Image("images/game_over.png"); 
 
+		AnimationTimer at = new AnimationTimer() {
+			
+			@Override
+			public void handle(long now) {
+				graphicsContext.drawImage(gameOver, 0, 0);
+				
+			}
+		};
+		
+		at.start();
+		
 		gameOverScene.setOnMouseClicked(event -> {
+			at.stop();
 			graphicsContext.fillRect(0, 0, 800, 620);
 			showStage(scene);
 		});
