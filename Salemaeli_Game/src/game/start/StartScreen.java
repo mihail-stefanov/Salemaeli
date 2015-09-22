@@ -1,5 +1,6 @@
-package game;
+package game.start;
 
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.Image;
@@ -15,16 +16,16 @@ public final class StartScreen {
 	private Rectangle levelButtonTarget;
 	private Rectangle exitButtonTarget;
 	
-	public StartScreen(GraphicsContext graphicsContext) {
-		renderGraphics(graphicsContext);
+	public StartScreen(GraphicsContext graphicsContext, Canvas canvas) {
+		show(graphicsContext, canvas);
 		initializeStartButtonTarget();
 		initializeInstructionButtonTarget();
 		initializeLevelButtonTarget();
 		initializeExitButtonTarget();
 	}
 	
-	public void renderGraphics (GraphicsContext graphicsContext) {
-		
+	public void show (GraphicsContext graphicsContext, Canvas canvas) {
+		graphicsContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		Image blueBrick = new Image("images/brick_blue.png");
 		Image tealBrick = new Image("images/brick_teal.png");
 		Image greenBrick = new Image("images/brick_green.png");

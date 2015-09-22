@@ -1,5 +1,7 @@
 package game;
 
+import game.start.*;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
@@ -43,19 +45,13 @@ public class Main extends Application {
 	private Board board = new Board(350, 575);
 	private Ball ball = new Ball(board.getPositionX() + board.getWidth() / 2, board.getPositionY() - Ball.radius, 1,
 			level.getballVelocity());
-
-	// Images // TODO: remove later
-	Image blueBrick = new Image("images/brick_blue.png");
-	Image tealBrick = new Image("images/brick_teal.png");
-	Image greenBrick = new Image("images/brick_green.png");
-	Image magentaBrick = new Image("images/brick_magenta.png");
 	
 	public static void main(String[] args) {
 		launch(args);
 	}
 
 	private void showStartScreen(Scene scene) {
-		StartScreen startScreen = new StartScreen(graphicsContext);
+		StartScreen startScreen = new StartScreen(graphicsContext, canvas);
 		scene.setCursor(Cursor.HAND);
 
 		scene.setOnMouseClicked(event -> {
@@ -66,7 +62,7 @@ public class Main extends Application {
 				showInstructions(scene);
 			}
 			if (startScreen.getLevelButtonTarget().contains(event.getX(), event.getY())) {
-				choosingDifficulty(scene);
+				showDifficultyChoices(scene);
 			}
 			if (startScreen.getExitButtonTarget().contains(event.getX(), event.getY())) {
 				Platform.exit();
@@ -75,103 +71,35 @@ public class Main extends Application {
 	}
 
 	private void showInstructions(Scene scene) {
-		graphicsContext.setFill(Color.WHITE);
-		graphicsContext.fillRect(0, 0, 800, 600);
-		graphicsContext.setFill(Color.RED);
-		graphicsContext.setLineWidth(1);
-		Font titleFont = Font.font(null, FontWeight.BOLD, 30);
-		graphicsContext.setFont(titleFont);
-
-		int leftArrow = 8_678;
-		String leftArrowUtf = Character.toString((char) leftArrow);
-		int rigthArrow = 8_680;
-		String rigthArrowUtf = Character.toString((char) rigthArrow);
-		graphicsContext.fillText("The main point is that you have to\n" + "break all of the bricks while\n"
-				+ "collecting the coins. Your points\n" + "will increase when you collect coins.\n"
-				+ "You can move the board with the\n" + "left " + leftArrowUtf + " and rigth " + rigthArrowUtf
-				+ " arrows on your\n" + "keyboard. Good luck!", 150, 150);
-
-		scene.setOnMouseClicked(event -> {
-			graphicsContext.setFill(Color.WHITE);
-			graphicsContext.fillRect(0, 0, 800, 600);
-			showStartScreen(scene);
-		});
+		Instructions.show(graphicsContext, canvas);
+		scene.setOnMouseClicked(event -> showStartScreen(scene));
 	}
 
-	private void choosingDifficulty(Scene scene) {
-		graphicsContext.setFill(Color.WHITE);
-		graphicsContext.fillRect(0, 0, 800, 600);
-
-		graphicsContext.setFill(Color.RED);
-		graphicsContext.setStroke(Color.BLACK);
-		graphicsContext.setLineWidth(3);
-		Font titleFont = Font.font(null, FontWeight.BOLD, 80);
-		graphicsContext.setFont(titleFont);
-		graphicsContext.fillText("Choose Difficulty", 100, 100);
-		graphicsContext.setLineWidth(2);
-		Font levelFont = Font.font(null, FontWeight.BOLD, 40);
-		graphicsContext.setFont(levelFont);
-		graphicsContext.fillText("Baby", 250, 200);
-		graphicsContext.fillText("Easy", 250, 300);
-		graphicsContext.fillText("Hard", 250, 400);
-		graphicsContext.fillText("Pro", 250, 500);
-
-		graphicsContext.drawImage(blueBrick, 200, 175);
-		graphicsContext.drawImage(tealBrick, 200, 275);
-		graphicsContext.drawImage(greenBrick, 200, 375);
-		graphicsContext.drawImage(magentaBrick, 200, 475);
-		
-		// Buttons
-		Rectangle babyTarget = new Rectangle();
-		babyTarget.setX(250);
-		babyTarget.setY(175);
-		babyTarget.setWidth(100);
-		babyTarget.setHeight(100);
-
-		Rectangle easyTarget = new Rectangle();
-		easyTarget.setX(250);
-		easyTarget.setY(275);
-		easyTarget.setWidth(200);
-		easyTarget.setHeight(100);
-
-		Rectangle hardTarget = new Rectangle();
-		hardTarget.setX(250);
-		hardTarget.setY(375);
-		hardTarget.setWidth(200);
-		hardTarget.setHeight(100);
-
-		Rectangle proTarget = new Rectangle();
-		proTarget.setX(250);
-		proTarget.setY(475);
-		proTarget.setWidth(200);
-		proTarget.setHeight(100);
+	private void showDifficultyChoices(Scene scene) {
+		DifficultyChoices difficultyChoices = new DifficultyChoices(graphicsContext, canvas);
 
 		scene.setOnMouseClicked(event -> {
-			if (babyTarget.contains(event.getX(), event.getY())) {
-				graphicsContext.setEffect(null);
+			if (difficultyChoices.getBabyButtonTarget().contains(event.getX(), event.getY())) {
 				beginGame(scene, Difficulty.BABY);
 			}
-
-			if (easyTarget.contains(event.getX(), event.getY())) {
-				graphicsContext.setEffect(null);
+			else if (difficultyChoices.getEasyButtonTarget().contains(event.getX(), event.getY())) {
 				beginGame(scene, Difficulty.EASY);
 			}
-
-			if (hardTarget.contains(event.getX(), event.getY())) {
-				graphicsContext.setEffect(null);
+			else if (difficultyChoices.getHardButtonTarge().contains(event.getX(), event.getY())) {
 				beginGame(scene, Difficulty.HARD);
 			}
-
-			if (proTarget.contains(event.getX(), event.getY())) {
-				graphicsContext.setEffect(null);
+			else if (difficultyChoices.getProButtonTarget().contains(event.getX(), event.getY())) {
 				beginGame(scene, Difficulty.PRO);
+			}
+			else {
+				showStartScreen(scene);
 			}
 		});
 	}
 
 	public void beginGame(Scene scene, Difficulty difficulty) {
 		Scene mainScene = scene;
-		// mainScene.setCursor(Cursor.NONE);
+//		 mainScene.setCursor(Cursor.NONE);
 
 		level.setChosenDifficulty(difficulty);
 		ball.setVelocityY(level.getballVelocity());
