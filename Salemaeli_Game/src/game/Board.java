@@ -38,6 +38,12 @@ public class Board extends GraphicalObject {
 		else if(this.getNumberOfWideBonuses() > 1){
 			this.image = new Image("images/widestBoard.png");
 		}
+		else if(this.getNumberOfWideBonuses() == -1){
+			this.image = new Image("images/shrinkedBoard.png");
+		}
+		else{
+			this.image = new Image("images/minimumBoard.png");
+		}
 	}
 
 	public int getNumberOfWideBonuses(){

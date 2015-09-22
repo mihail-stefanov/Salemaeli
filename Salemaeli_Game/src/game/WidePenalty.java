@@ -2,12 +2,12 @@ package game;
 
 import javafx.scene.image.Image;
 
-public class WideBonus extends Bonus{
+public class WidePenalty extends Penalty{
 
-    public static double widthBonus = 50;
+    public static double widthBonus = 40;
     private Image image;
 
-    public WideBonus(double positionX, double positionY) {
+    public WidePenalty(double positionX, double positionY) {
         super(positionX, positionY);
         setImage();
     }
@@ -19,11 +19,11 @@ public class WideBonus extends Bonus{
 
     @Override
     protected void setImage() {
-        this.image = new Image("images/wideBonus.png");
+        this.image = new Image("images/widePenalty.png");
     }
 
     public void takeEffect(Board board){
-        board.setNumberOfWideBonuses(board.getNumberOfWideBonuses() + 1);
+        board.setNumberOfWideBonuses(board.getNumberOfWideBonuses() - 1);
         board.setWidth(board.getWidth() + board.getNumberOfWideBonuses() * widthBonus);
     }
 }

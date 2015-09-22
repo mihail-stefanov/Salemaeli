@@ -1,5 +1,6 @@
 package game;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 import javafx.animation.AnimationTimer;
@@ -54,6 +55,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -75,6 +78,7 @@ public class Main extends Application {
 	ArrayList<Brick> bricks = new ArrayList<>();
 	ArrayList<Coin> coins = new ArrayList<>();
 	ArrayList<Bonus> bonuses = new ArrayList<>();
+	ArrayList<Penalty> penalties = new ArrayList<>();
 	Board board = new Board(350, 575);
 	Ball ball = new Ball(board.getPositionX() + board.getWidth() / 2, board.getPositionY() - Ball.radius, 1,
 			level.getballVelocity());
@@ -345,6 +349,13 @@ public class Main extends Application {
 			bonuses.get(i).setPositionX(bonuses.get(i).getPositionX() + bonuses.get(i).getVelocityX());
 		}
 
+		// Moving the penalties
+		for (int i = 0; i < penalties.size(); i++) {
+			penalties.get(i).updateVelocityY();
+			penalties.get(i).setPositionY(penalties.get(i).getPositionY() + penalties.get(i).getVelocityY());
+			penalties.get(i).setPositionX(penalties.get(i).getPositionX() + penalties.get(i).getVelocityX());
+		}
+
 		// Moving the ball if the mouse is clicked or the space is pressed
 		if (inputKeys.contains("SPACE")) {
 			ball.setAsReleased(true);
@@ -442,9 +453,31 @@ public class Main extends Application {
 			}
 		}
 
+		// Penalties collisions with the board
+		for (int i = 0; i < penalties.size(); i++) {
+			double boardPenaltyDifferenceY = board.getPositionY() - penalties.get(i).getPositionY();
+			double boardPenaltyDifferenceX = board.getPositionX() - penalties.get(i).getPositionX();
+
+			boolean penaltyHitBoard = boardPenaltyDifferenceY < Penalty.penaltyHeight && boardPenaltyDifferenceY > - Penalty.penaltyHeight
+					&& boardPenaltyDifferenceX < Penalty.penaltyWidth && boardPenaltyDifferenceX > -(board.getWidth() + Penalty.penaltyWidth);
+			if (penaltyHitBoard) {
+				if (penalties.get(i) instanceof LifePenalty){
+					((LifePenalty) penalties.get(i)).takeEffect(gameStats);
+				}
+				else if(penalties.get(i) instanceof WidePenalty){
+					((WidePenalty) penalties.get(i)).takeEffect(board);
+				}
+				else if(penalties.get(i) instanceof LosePointsPenalty){
+					((LosePointsPenalty) penalties.get(i)).takeEffect(gameStats);
+				}
+
+				penalties.remove(i);
+			}
+		}
+
 		// Ball collisions with bricks
 		for (int i = 0; i < bricks.size(); i++) {
-			double bonusTreshold = new Random().nextDouble();
+			double objectTreshold = new Random().nextDouble(); // Treshold for coin or bonus or penalty generation.
 
 			double brickBallDifferenceY = bricks.get(i).getPositionY() - ball.getPositionY();
 			double brickBallDifferenceX = bricks.get(i).getPositionX() - ball.getPositionX();
@@ -459,18 +492,28 @@ public class Main extends Application {
 				if (ballHitBrickVertically) {
 					ball.setVelocityY(ball.getVelocityY() * -1);
 					ball.setPositionY(ball.getPositionY() + ball.getVelocityY());
-					if(bonusTreshold >= 0.2) {
+					if(objectTreshold >= 0.18) {
 						coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
 					}
-					else if(bonusTreshold < 0.2 && bonusTreshold >= 0.13){
+					else if(objectTreshold < 0.18 && objectTreshold >= 0.15){
 						bonuses.add(new LifeBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
 					}
-					else if(bonusTreshold < 0.13 && bonusTreshold >= 0.06){
+					else if(objectTreshold < 0.15 && objectTreshold >= 0.12){
 						bonuses.add(new WideBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
 					}
-					else if(bonusTreshold < 0.06){
+					else if(objectTreshold < 0.12 && objectTreshold >= 0.09){
 						bonuses.add(new FireBall(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
 					}
+					else if(objectTreshold < 0.09 && objectTreshold >= 0.06){
+						penalties.add(new LifePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					else if(objectTreshold < 0.06 && objectTreshold >= 0.03){
+						penalties.add(new WidePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					else if(objectTreshold < 0.03){
+						penalties.add(new LosePointsPenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+
 					if(ball.isFireBall()){
 						bricks.remove(i); // TODO implement fireball behavior
 					}
@@ -481,22 +524,30 @@ public class Main extends Application {
 				} else {
 					ball.setVelocityX(ball.getVelocityX() * -1);
 					ball.setPositionX(ball.getPositionX() + ball.getVelocityX());
-					if(bonusTreshold >= 0.2) {
+					if(objectTreshold >= 0.18) {
 						coins.add(new Coin(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10, level.getBonusToScoreByLevel()));
 					}
-					else if(bonusTreshold < 0.2 && bonusTreshold >= 0.13){
+					else if(objectTreshold < 0.18 && objectTreshold >= 0.15){
 						bonuses.add(new LifeBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
 					}
-					else if(bonusTreshold < 0.13 && bonusTreshold >= 0.06){
+					else if(objectTreshold < 0.15 && objectTreshold >= 0.12){
 						bonuses.add(new WideBonus(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
 					}
-					else if(bonusTreshold < 0.06){
+					else if(objectTreshold < 0.12 && objectTreshold >= 0.09){
 						bonuses.add(new FireBall(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
 					}
+					else if(objectTreshold < 0.09 && objectTreshold >= 0.06){
+						penalties.add(new LifePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					else if(objectTreshold < 0.06 && objectTreshold >= 0.03){
+						penalties.add(new WidePenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+					else if(objectTreshold < 0.03){
+						penalties.add(new LosePointsPenalty(bricks.get(i).getPositionX() + 20, bricks.get(i).getPositionY() + 10 ));
+					}
+
 					if(ball.isFireBall()){
-				//		bricks.remove(i-1); // TODO implement multiple brick destruction when "fireBall"
-						bricks.remove(i);
-					//	bricks.remove(i+1);
+						bricks.remove(i); // TODO implement fireball behavior
 					}
 					else {
 						bricks.remove(i);
@@ -529,6 +580,12 @@ public class Main extends Application {
 		for (int i = 0; i < bonuses.size(); i++) {
 			graphicsContext.drawImage(bonuses.get(i).getImage(), bonuses.get(i).getPositionX() - Bonus.bonusWidth,
 					bonuses.get(i).getPositionY() - Bonus.bonusHeight);
+		}
+
+		// Drawing the penalties
+		for (int i = 0; i < penalties.size(); i++) {
+			graphicsContext.drawImage(penalties.get(i).getImage(), penalties.get(i).getPositionX() - Penalty.penaltyWidth,
+					penalties.get(i).getPositionY() - Penalty.penaltyHeight);
 		}
 
 		// Drawing the ball (creating an offset equal to the ball's radius, i.e.
@@ -648,12 +705,20 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage window) throws Exception {
+		final URL resource = getClass().getResource("/sounds/PinguinDance.mp4");
+		final Media media = new Media(resource.toString());
+		final MediaPlayer mediaPlayer = new MediaPlayer(media);
+	    mediaPlayer.play();
+		//  mediaPlayer.setMute(true);
+		
 		window.setTitle("Break&Collect"); 
 		Group root = new Group();
 		Scene mainScene = new Scene(root);
 		window.setScene(mainScene);
+		window.getIcons().add(new Image("images/wall32.PNG"));
 		root.getChildren().add(canvas);
 		window.show();
+
 
 		showStartScreen(mainScene);
 	}
