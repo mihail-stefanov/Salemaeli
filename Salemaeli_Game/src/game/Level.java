@@ -18,8 +18,8 @@ public class Level {
 		setLevelItems();
 	}
 	
-	public Level(Difficulty chosenDifficult) {
-		setChosenDifficulty(chosenDifficult);
+	public Level(Difficulty chosenDifficulty) {
+		setChosenDifficulty(chosenDifficulty);
 		setLevelItems();
 	}
 
@@ -60,7 +60,7 @@ public class Level {
 		switch (chosenDifficulty) {
 		case BABY:
 			setBallVelocity(-3);
-			this.map = loadMap("src/levels/baby.txt"); // TODO: Level to be added
+			this.map = loadMap("src/levels/baby.txt");
 			setInitialNumberOfLives(5);
 			setBonusToScoreByLevel(5);
 			break;

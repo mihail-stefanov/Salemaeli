@@ -11,7 +11,6 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -29,23 +28,23 @@ import javafx.scene.media.MediaPlayer;
 public class Main extends Application {
 
 	// Loading the game objects
-	Canvas canvas = new Canvas(800, 620);
-	GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
+	private Canvas canvas = new Canvas(800, 620);
+	private GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 
-	Level level = new Level();
-	Stats gameStats = new Stats(level.getInitialNumberOfLives());
-	ArrayList<String> inputKeys = new ArrayList<String>();
+	private Level level = new Level();
+	private Stats gameStats = new Stats(level.getInitialNumberOfLives());
+	private ArrayList<String> inputKeys = new ArrayList<String>();
 
-	boolean gameEnded = false;
-	ArrayList<Brick> bricks = new ArrayList<>();
-	ArrayList<Coin> coins = new ArrayList<>();
-	ArrayList<Bonus> bonuses = new ArrayList<>();
-	ArrayList<Penalty> penalties = new ArrayList<>();
-	Board board = new Board(350, 575);
-	Ball ball = new Ball(board.getPositionX() + board.getWidth() / 2, board.getPositionY() - Ball.radius, 1,
+	private boolean gameEnded = false;
+	private ArrayList<Brick> bricks = new ArrayList<>();
+	private ArrayList<Coin> coins = new ArrayList<>();
+	private ArrayList<Bonus> bonuses = new ArrayList<>(); // TODO: Create an abstract class for all falling objects (bonuses and coins)
+	private ArrayList<Penalty> penalties = new ArrayList<>();
+	private Board board = new Board(350, 575);
+	private Ball ball = new Ball(board.getPositionX() + board.getWidth() / 2, board.getPositionY() - Ball.radius, 1,
 			level.getballVelocity());
 
-	// Images
+	// Images // TODO: remove later
 	Image blueBrick = new Image("images/brick_blue.png");
 	Image tealBrick = new Image("images/brick_teal.png");
 	Image greenBrick = new Image("images/brick_green.png");
@@ -56,79 +55,20 @@ public class Main extends Application {
 	}
 
 	private void showStartScreen(Scene scene) {
-		Scene beginScene = scene;
-		beginScene.setCursor(Cursor.HAND);
+		StartScreen startScreen = new StartScreen(graphicsContext);
+		scene.setCursor(Cursor.HAND);
 
-		InnerShadow is = new InnerShadow();
-		is.setOffsetX(4.0f);
-		is.setOffsetY(4.0f);
-
-		// Title
-		graphicsContext.setFill(Color.RED);
-		graphicsContext.setStroke(Color.BLACK);
-		graphicsContext.setLineWidth(3);
-		Font titleFont = Font.font(null, FontWeight.BOLD, 80);
-		graphicsContext.setFont(titleFont);
-		graphicsContext.setEffect(is);
-		graphicsContext.fillText("Break&Collect!", 100, 100);
-
-		// Main Menu
-		graphicsContext.setFill(Color.GOLD);
-		graphicsContext.setStroke(Color.BLACK);
-		graphicsContext.setLineWidth(2);
-		Font menuFont = Font.font(null, FontWeight.BOLD, 40);
-		graphicsContext.setFont(menuFont);
-		graphicsContext.fillText("Start Game", 250, 200);
-		graphicsContext.fillText("Instructions", 250, 300);
-		graphicsContext.fillText("Choose Difficulty", 250, 400);
-		graphicsContext.fillText("Exit", 250, 500);
-
-		// Buttons
-		Rectangle startTarget = new Rectangle();
-		startTarget.setX(250);
-		startTarget.setY(175);
-		startTarget.setWidth(200);
-		startTarget.setHeight(100);
-
-		Rectangle instructionTarget = new Rectangle();
-		instructionTarget.setX(250);
-		instructionTarget.setY(275);
-		instructionTarget.setWidth(200);
-		instructionTarget.setHeight(100);
-
-		Rectangle levelTarget = new Rectangle();
-		levelTarget.setX(250);
-		levelTarget.setY(375);
-		levelTarget.setWidth(200);
-		levelTarget.setHeight(100);
-
-		Rectangle exitTarget = new Rectangle();
-		exitTarget.setX(250);
-		exitTarget.setY(475);
-		exitTarget.setWidth(200);
-		exitTarget.setHeight(100);
-
-		graphicsContext.drawImage(blueBrick, 200, 175);
-		graphicsContext.drawImage(tealBrick, 200, 275);
-		graphicsContext.drawImage(greenBrick, 200, 375);
-		graphicsContext.drawImage(magentaBrick, 200, 475);
-
-		beginScene.setOnMouseClicked(event -> {
-			if (startTarget.contains(event.getX(), event.getY())) {
-				graphicsContext.setEffect(null);
+		scene.setOnMouseClicked(event -> {
+			if (startScreen.getStartButtonTarget().contains(event.getX(), event.getY())) {
 				beginGame(scene, Difficulty.EASY);
 			}
-
-			if (instructionTarget.contains(event.getX(), event.getY())) {
-				graphicsContext.setEffect(null);
+			if (startScreen.getInstructionButtonTarget().contains(event.getX(), event.getY())) {
 				showInstructions(scene);
 			}
-
-			if (levelTarget.contains(event.getX(), event.getY())) {
+			if (startScreen.getLevelButtonTarget().contains(event.getX(), event.getY())) {
 				choosingDifficulty(scene);
 			}
-
-			if (exitTarget.contains(event.getX(), event.getY())) {
+			if (startScreen.getExitButtonTarget().contains(event.getX(), event.getY())) {
 				Platform.exit();
 			}
 		});
