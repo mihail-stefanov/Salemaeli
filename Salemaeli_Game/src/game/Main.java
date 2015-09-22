@@ -5,10 +5,8 @@ import game.play.*;
 import game.play.fallingObjects.*;
 import game.end.*;
 
-
-import java.net.URL;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Random;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -19,13 +17,10 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.scene.control.TextField;
-import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -43,11 +38,35 @@ public class Main extends Application {
 	private ArrayList<Brick> bricks = new ArrayList<>();
 	private ArrayList<FallingObject> fallingObjects = new ArrayList<>();
 	private Board board = new Board(350, 575);
-	private Ball ball = new Ball(board.getPositionX() + board.getWidth() / 2, board.getPositionY() - Ball.radius, 1,
-			level.getballVelocity());
+	private Ball ball = new Ball(board.getPositionX() + board.getWidth() / 2, 
+									board.getPositionY() - Ball.radius, 1,
+									level.getballVelocity());
 	
 	public static void main(String[] args) {
 		launch(args);
+	}
+	
+	@Override
+	public void start(Stage window) throws Exception {
+		Media media = new Media(new File("src/sounds/PinguinDance.mp2").toURI().toString());
+		MediaPlayer mediaPlayer = new MediaPlayer(media);
+		mediaPlayer.setOnEndOfMedia(new Runnable() {
+			@Override
+			public void run() {
+				mediaPlayer.seek(Duration.ZERO);
+			}
+		});
+		mediaPlayer.play();
+
+		window.setTitle("Break&Collect");
+		Group root = new Group();
+		Scene mainScene = new Scene(root);
+		window.setScene(mainScene);
+		window.getIcons().add(new Image("images/wall32.PNG"));
+		root.getChildren().add(canvas);
+		window.show();
+
+		showStartScreen(mainScene);
 	}
 
 	private void showStartScreen(Scene scene) {
@@ -100,7 +119,7 @@ public class Main extends Application {
 	public void beginGame(Scene scene, Difficulty difficulty) {
 		Scene mainScene = scene;
 		graphicsContext.setFill(Color.BLACK);
-//		mainScene.setCursor(Cursor.NONE); // TODO: Use to fix board size bonuses and penalties
+		mainScene.setCursor(Cursor.NONE);
 
 		level.setChosenDifficulty(difficulty);
 		ball.setVelocityY(level.getballVelocity());
@@ -116,7 +135,7 @@ public class Main extends Application {
 
 		mainScene.setOnKeyReleased(event -> inputKeys.remove(event.getCode().toString()));
 		mainScene.setOnMouseClicked(event -> ball.setAsReleased(true));
-		mainScene.setOnMouseMoved(event -> board.setPositionX((int) event.getX() - board.getWidth() / 2));
+		mainScene.setOnMouseMoved(event -> board.setPositionX(event.getX() - board.getWidth() / 2));
 
 		new AnimationTimer() {
 
@@ -151,24 +170,31 @@ public class Main extends Application {
 
 		// Moving the coins, bonuses and penalties
 		for (int i = 0; i < fallingObjects.size(); i++) {
-			fallingObjects.get(i).updateVelocityY();
-			fallingObjects.get(i).setPositionY(fallingObjects.get(i).getPositionY() + fallingObjects.get(i).getVelocityY());
-			fallingObjects.get(i).setPositionX(fallingObjects.get(i).getPositionX() + fallingObjects.get(i).getVelocityX());
+			fallingObjects.get(i).move();
 		}
 
 		// Moving the ball if the mouse is clicked or the space is pressed
 		if (inputKeys.contains("SPACE")) {
 			ball.setAsReleased(true);
 		}
+		
 		if (ball.isReleased()) {
 			ball.move();
-		} else {
-			ball.setPositionX(board.getPositionX() + board.getWidth() / 2); // TODO: Convert to a method
-			ball.setPositionY(board.getPositionY() - Ball.radius);
+		} 
+		else {
+			ball.stayAttachedToBoard(board);
+		}
+		
+		// Removing time from FireBall bonus
+		if (ball.isFireBall()) {
+			ball.setFireBallDuration(ball.getFireBallDuration() - 1);
+			if (ball.getFireBallDuration() < 0) {
+				ball.setAsFireBall(false);
+			}
 		}
 
 		// Moving the board with keys, in addition to using the mouse position
-		board.move(inputKeys);
+		board.move(inputKeys, canvas);
 	}
 
 	private void detectAndResolveCollisions(Scene scene) {
@@ -195,13 +221,11 @@ public class Main extends Application {
 
 		// Ball collisions with bricks
 		for (int i = 0; i < bricks.size(); i++) {
-			
 			boolean ballHitBrick = ball.detectAndResolveCollisionsWithBrick(bricks.get(i), fallingObjects, level);
 			
 			if (ballHitBrick) {
 				bricks.remove(i);
 			}
-			
 		}
 	}
 
@@ -247,132 +271,53 @@ public class Main extends Application {
 	}
 
 	private void showGameOverScreen(Scene scene) {
-		Scene gameOverScene = scene;
+		Image gameOverImage = new Image("images/game_over.png");
 
-		graphicsContext.setEffect(null);
-		graphicsContext.clearRect(0, 0, 800, 620);
-		graphicsContext.setFill(Color.WHITE);
-		Image gameOver = new Image("images/game_over.png"); 
-
-		AnimationTimer at = new AnimationTimer() {
+		AnimationTimer animationTimer = new AnimationTimer() {
 			
 			@Override
 			public void handle(long now) {
-				graphicsContext.drawImage(gameOver, 0, 0);
-				
+				graphicsContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+				graphicsContext.drawImage(gameOverImage, 0, 0);
 			}
 		};
 		
-		at.start();
+		animationTimer.start();
 		
-		gameOverScene.setOnMouseClicked(event -> {
-			at.stop();
-			graphicsContext.fillRect(0, 0, 800, 620);
-			showStage(scene);
+		scene.setOnMouseClicked(event -> {
+			animationTimer.stop();
+			showPopUpWindow(scene);
 		});
 	}
 
-	public void showStage(Scene scene) {
-		Stage newStage = new Stage();
+	public void showPopUpWindow(Scene scene) {
+		Stage popUpWindow = new Stage();
 		VBox comp = new VBox();
-		TextField field = new TextField("");
-		comp.getChildren().add(field);
+		TextField textField = new TextField("");
+		comp.getChildren().add(textField);
 
 		Scene additionalScene = new Scene(comp, 400, 28);
-		newStage.setTitle("Enter your username here:");
-		newStage.setScene(additionalScene);
+		popUpWindow.setTitle("Enter your username here:");
+		popUpWindow.setScene(additionalScene);
 		
-		field.setOnKeyPressed(new EventHandler<KeyEvent>() {
-			@Override
-			public void handle(KeyEvent e) {
-				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.SPACE) {
-					String username = field.getText();
-					showHighestScores(scene, username);
-					newStage.close();
-				}
+		textField.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
+				String username = textField.getText();
+				showHighestScores(scene, username);
+				popUpWindow.close();
 			}
 		});
 
-		newStage.show();
+		popUpWindow.show();
 	}
 
 	private void showHighestScores(Scene scene, String username) {
-		String line = FileManeger.ReadFromFile();
-		String[] highestScoresInput = generatingNewHighestScores(line, username);
-		String output = String.join(" ", highestScoresInput);
-		FileManeger.WriteToFile(output);
-
-		String textResult = generatingTextForConsole(highestScoresInput);
-		graphicsContext.setFill(Color.RED);
-		graphicsContext.setLineWidth(1);
-		Font titleFont = Font.font(null, FontWeight.BOLD, 50);
-		graphicsContext.setFont(titleFont);
-		graphicsContext.fillText("High scores!", 250, 200);
-
-		Font scoreFont = Font.font(null, FontWeight.BOLD, 30);
-		graphicsContext.setFont(scoreFont);
-		graphicsContext.fillText(textResult, 290, 300);
-
+		HighScores highScores = new HighScores();
+		highScores.show(graphicsContext, canvas, username, gameStats);
+		
 		scene.setOnMouseClicked(event -> {
 			Platform.exit();
 		});
 	}
 
-	private String generatingTextForConsole(String[] highestScoresInput) {
-		StringBuilder result = new StringBuilder("1. ");
-
-		int position = 1;
-		for (int i = 0; i < highestScoresInput.length; i++) {
-			result.append(highestScoresInput[i]);
-
-			if (i % 2 == 0) {
-				result.append(" - ");
-			} else {
-				if (position != 5) {
-					result.append("\n" + ++position + ". ");
-				}
-			}
-		}
-
-		return result.toString();
-	}
-
-	private String[] generatingNewHighestScores(String line, String username) {
-		int score = gameStats.getScore();
-		String[] highestScoresInput = line.split(" ");
-
-		for (int i = 1; i < highestScoresInput.length; i += 2) {
-			if (score > Integer.parseInt(highestScoresInput[i])) {
-				for (int j = highestScoresInput.length - 1; j >= i + 2; j -= 2) {
-					highestScoresInput[j] = highestScoresInput[j - 2];
-					highestScoresInput[j - 1] = highestScoresInput[j - 3];
-				}
-
-				highestScoresInput[i] = Integer.toString(score);
-				highestScoresInput[i - 1] = username;
-				break;
-			}
-		}
-
-		return highestScoresInput;
-	}
-
-	@Override
-	public void start(Stage window) throws Exception {
-		final URL resource = getClass().getResource("/sounds/PinguinDance.mp4");
-		final Media media = new Media(resource.toString());
-		final MediaPlayer mediaPlayer = new MediaPlayer(media);
-		mediaPlayer.play();
-		// mediaPlayer.setMute(true);
-
-		window.setTitle("Break&Collect");
-		Group root = new Group();
-		Scene mainScene = new Scene(root);
-		window.setScene(mainScene);
-		window.getIcons().add(new Image("images/wall32.PNG"));
-		root.getChildren().add(canvas);
-		window.show();
-
-		showStartScreen(mainScene);
-	}
 }

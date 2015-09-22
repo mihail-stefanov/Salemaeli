@@ -19,6 +19,7 @@ public class Ball extends GraphicalObject {
 	public static double radius = 7.5;
 	private boolean released = false;
 	private boolean fireBall = false;
+	private int fireBallDuration;
 	private double velocityX;
 	private double velocityY;
 	private Image image;
@@ -42,9 +43,18 @@ public class Ball extends GraphicalObject {
 	public boolean isFireBall() {
 		return this.fireBall;
 	}
+	
+	public int getFireBallDuration() {
+		return fireBallDuration;
+	}
+
+	public void setFireBallDuration(int fireBallDuration) {
+		this.fireBallDuration = fireBallDuration;
+	}
 
 	public void setAsFireBall(boolean fireBall){
 		this.fireBall = fireBall;
+		this.setFireBallDuration(300); // Five seconds (300 / 60)
 		setImage();
 	}
 	public double getVelocityX() {
@@ -79,17 +89,22 @@ public class Ball extends GraphicalObject {
 	public void detectAndResolveCollisionsWithBoundries(Canvas canvas, Stats gameStats, Board board) {
 		
 		// Ball collisions with the walls
-		boolean ballHitWalls = this.getPositionX() < Ball.radius || 
-								this.getPositionX() > canvas.getWidth() - Ball.radius;
+		
+		boolean ballHitLeftWall = this.getPositionX() < Ball.radius;
+								
+		boolean ballHitRightWall = this.getPositionX() > canvas.getWidth() - Ball.radius;
 
-		if (ballHitWalls) {
-			this.setVelocityX(this.getVelocityX() * -1);
+		if (ballHitLeftWall) {
+			this.setVelocityX(Math.abs(this.getVelocityX()));
+		}
+		if (ballHitRightWall) {
+			this.setVelocityX(Math.abs(this.getVelocityX()) * -1);
 		}
 
 		boolean ballHitCeiling = this.getPositionY() < Ball.radius;
 
 		if (ballHitCeiling) {
-			this.setVelocityY(this.getVelocityY() * -1);
+			this.setVelocityY(Math.abs(this.getVelocityY()));
 		}
 
 		// Ball collisions with the floor
@@ -181,5 +196,10 @@ public class Ball extends GraphicalObject {
 		}
 		
 		return ballHitBrick;
+	}
+
+	public void stayAttachedToBoard(Board board) {
+		this.setPositionX(board.getPositionX() + board.getWidth() / 2);
+		this.setPositionY(board.getPositionY() - Ball.radius);
 	}
 }

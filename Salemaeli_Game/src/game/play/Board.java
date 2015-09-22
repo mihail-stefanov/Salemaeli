@@ -2,6 +2,7 @@ package game.play;
 
 import java.util.ArrayList;
 
+import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 
 public class Board extends GraphicalObject {
@@ -54,14 +55,15 @@ public class Board extends GraphicalObject {
 		this.numberOfWideBonuses = numberOfWideBonuses;
 		this.setImage();
 	}
-	public void move(ArrayList<String> inputKeys) {
+	
+	public void move(ArrayList<String> inputKeys, Canvas canvas) {
 		if (inputKeys.contains("LEFT")) {
-			if (this.getPositionX() >= 5) {
+			if (this.getPositionX() >= 0) {
 				this.setPositionX(this.getPositionX() - 5);
 			}
 		}
 		if (inputKeys.contains("RIGHT")) {
-			if (this.getPositionX() <= 695) {
+			if (this.getPositionX() <= canvas.getWidth() - this.width) {
 				this.setPositionX(this.getPositionX() + 5);
 			}
 		}

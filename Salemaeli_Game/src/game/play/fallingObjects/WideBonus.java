@@ -5,7 +5,7 @@ import javafx.scene.image.Image;
 
 public class WideBonus extends Artifact {
 
-    public static double widthBonus = 50;
+    public static double widthBonus = 40;
     private Image image;
 
     public WideBonus(double positionX, double positionY) {
@@ -23,8 +23,8 @@ public class WideBonus extends Artifact {
         this.image = new Image("images/wideBonus.png");
     }
 
-    public void takeEffect(Board board){
+    public void takeEffect(Board board) {
         board.setNumberOfWideBonuses(board.getNumberOfWideBonuses() + 1);
-        board.setWidth(board.getWidth() + board.getNumberOfWideBonuses() * widthBonus);
+        board.setWidth(100 + board.getNumberOfWideBonuses() * widthBonus);
     }
 }

@@ -22,7 +22,7 @@ public class FireBallBonus extends Artifact{
         this.image = new Image("images/ballRedBonus.png");
     }
 
-    public void takeEffect(Ball ball){
+    public void takeEffect(Ball ball) {
         ball.setAsFireBall(true);
     }
 }

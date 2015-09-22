@@ -23,8 +23,8 @@ public class WidePenalty extends Artifact{
         this.image = new Image("images/widePenalty.png");
     }
 
-    public void takeEffect(Board board){
+    public void takeEffect(Board board) {
         board.setNumberOfWideBonuses(board.getNumberOfWideBonuses() - 1);
-        board.setWidth(board.getWidth() + board.getNumberOfWideBonuses() * widthBonus);
+        board.setWidth(100 + board.getNumberOfWideBonuses() * widthBonus);
     }
 }

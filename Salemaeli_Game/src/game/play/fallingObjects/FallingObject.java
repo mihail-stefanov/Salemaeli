@@ -4,7 +4,7 @@ import java.util.Random;
 
 import game.play.GraphicalObject;
 
-public abstract class FallingObject extends GraphicalObject{
+public abstract class FallingObject extends GraphicalObject {
 	
 	private double gravity = 0.1;
 	private double velocityY = -3;
@@ -24,6 +24,13 @@ public abstract class FallingObject extends GraphicalObject{
 	
 	public void updateVelocityY() {
 		this.velocityY += gravity;
+	}
+
+	public void move() {
+		this.updateVelocityY();
+		this.setPositionY(this.getPositionY() + this.getVelocityY());
+		this.setPositionX(this.getPositionX() + this.getVelocityX());
+		
 	}
 
 }
