@@ -1,7 +1,8 @@
-package game;
+package game.play.fallingObjects;
 
 import java.util.Random;
 
+import game.play.GraphicalObject;
 import javafx.scene.image.Image;
 
 public class Coin extends GraphicalObject {

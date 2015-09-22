@@ -1,6 +1,10 @@
 package game;
 
 import game.start.*;
+import game.play.*;
+import game.play.fallingObjects.*;
+import game.end.*;
+
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,7 +19,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
@@ -37,7 +40,6 @@ public class Main extends Application {
 	private Stats gameStats = new Stats(level.getInitialNumberOfLives());
 	private ArrayList<String> inputKeys = new ArrayList<String>();
 
-	private boolean gameEnded = false;
 	private ArrayList<Brick> bricks = new ArrayList<>();
 	private ArrayList<Coin> coins = new ArrayList<>();
 	private ArrayList<Bonus> bonuses = new ArrayList<>(); // TODO: Create an abstract class for all falling objects (bonuses and coins)
@@ -122,11 +124,13 @@ public class Main extends Application {
 			@Override
 			public void handle(long now) {
 				updateObjects(scene);
-				drawObjects();
-
-				if (gameEnded) {
+				
+				if (gameStats.getNumberOfLives() < 0) {
 					this.stop();
+					showGameOverScreen(scene);
 				}
+				
+				drawObjects();
 			}
 		}.start();
 	}
@@ -184,58 +188,18 @@ public class Main extends Application {
 	}
 
 	private void detectAndResolveCollisions(Scene scene) {
-
-		// Ball collisions with the walls
-		boolean ballHitWalls = ball.getPositionX() < Ball.radius
-				|| ball.getPositionX() > canvas.getWidth() - Ball.radius;
-
-		if (ballHitWalls) {
-			ball.setVelocityX(ball.getVelocityX() * -1);
-		}
-
-		boolean ballHitCeiling = ball.getPositionY() < Ball.radius;
-
-		if (ballHitCeiling) {
-			ball.setVelocityY(ball.getVelocityY() * -1);
-		}
-
-		boolean ballHitFloor = ball.getPositionY() > canvas.getHeight() + Ball.radius;
-
-		if (ballHitFloor) {
-
-			try {
-				gameStats.setNumberOfLives(gameStats.getNumberOfLives() - 1);
-			} catch (IllegalArgumentException e) {
-				gameEnded = true;
-				showGameOverScreen(scene);
-			}
-
-			board.setNumberOfWideBonuses(0);
-			board.setWidth(board.initialBoardWidth);
-			ball.setAsReleased(false);
-			ball.setAsFireBall(false);
-			ball.setPositionX(board.getPositionX() + board.getWidth() / 2);
-			ball.setPositionY(board.getPositionY() - Ball.radius);
-		}
-
-		// Ball collisions with the board
-		double boardBallDifferenceY = board.getPositionY() - ball.getPositionY();
-		double boardBallDifferenceX = board.getPositionX() - ball.getPositionX();
-
-		boolean ballHitBoard = boardBallDifferenceY < Ball.radius && boardBallDifferenceY > 0
-				&& boardBallDifferenceX < Ball.radius && boardBallDifferenceX > -(board.getWidth() + Ball.radius);
-		if (ballHitBoard) {
-			ball.setVelocityY(level.getballVelocity());
-			ball.setVelocityX(-1 * ((boardBallDifferenceX + board.getWidth() / 2) / 10));
-		}
+		ball.detectAndResolveCollisionsWithBoundries(canvas, gameStats, board);
+		ball.detectAndResolveCollisionsWithBoard(board, level);
 
 		// Coin collisions with the board
 		for (int i = 0; i < coins.size(); i++) {
 			double boardCoinDifferenceY = board.getPositionY() - coins.get(i).getPositionY();
 			double boardCoinDifferenceX = board.getPositionX() - coins.get(i).getPositionX();
 
-			boolean coinHitBoard = boardCoinDifferenceY < Coin.radius && boardCoinDifferenceY > -Coin.radius
-					&& boardCoinDifferenceX < Coin.radius && boardCoinDifferenceX > -(board.getWidth() + Coin.radius);
+			boolean coinHitBoard = boardCoinDifferenceY < Coin.radius && 
+									boardCoinDifferenceY > -Coin.radius && 
+									boardCoinDifferenceX < Coin.radius && 
+									boardCoinDifferenceX > -(board.getWidth() + Coin.radius);
 			if (coinHitBoard) {
 				gameStats.setScore(coins.get(i).getBonusToScore());
 				coins.remove(i);
@@ -247,9 +211,10 @@ public class Main extends Application {
 			double boardBonusDifferenceY = board.getPositionY() - bonuses.get(i).getPositionY();
 			double boardBonusDifferenceX = board.getPositionX() - bonuses.get(i).getPositionX();
 
-			boolean bonusHitBoard = boardBonusDifferenceY < Bonus.bonusHeight
-					&& boardBonusDifferenceY > -Bonus.bonusHeight && boardBonusDifferenceX < Bonus.bonusWidth
-					&& boardBonusDifferenceX > -(board.getWidth() + Bonus.bonusWidth);
+			boolean bonusHitBoard = boardBonusDifferenceY < Bonus.bonusHeight && 
+									boardBonusDifferenceY > -Bonus.bonusHeight && 
+									boardBonusDifferenceX < Bonus.bonusWidth && 
+									boardBonusDifferenceX > -(board.getWidth() + Bonus.bonusWidth);
 			if (bonusHitBoard) {
 				if (bonuses.get(i) instanceof LifeBonus) {
 					((LifeBonus) bonuses.get(i)).takeEffect(gameStats);
@@ -448,8 +413,7 @@ public class Main extends Application {
 		Scene additionalScene = new Scene(comp, 400, 28);
 		newStage.setTitle("Enter your username here:");
 		newStage.setScene(additionalScene);
-
-		String username = "";
+		
 		field.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent e) {

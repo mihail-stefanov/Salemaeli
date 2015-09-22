@@ -1,5 +1,6 @@
-package game;
+package game.play.fallingObjects;
 
+import game.play.Stats;
 import javafx.scene.image.Image;
 
 public class LifeBonus extends Bonus{

@@ -1,6 +1,6 @@
-package game;
+package game.play.fallingObjects;
 
-import java.util.Random;
+import game.play.Ball;
 import javafx.scene.image.Image;
 
 public class FireBall extends Bonus{

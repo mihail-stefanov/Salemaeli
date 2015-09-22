@@ -1,5 +1,6 @@
-package game;
+package game.play.fallingObjects;
 
+import game.play.Board;
 import javafx.scene.image.Image;
 
 public class WidePenalty extends Penalty{

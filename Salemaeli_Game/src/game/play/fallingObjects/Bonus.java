@@ -1,16 +1,18 @@
-package game;
+package game.play.fallingObjects;
 
 import javafx.scene.image.Image;
 import java.util.Random;
 
-public abstract class Penalty extends GraphicalObject{
-    public static double penaltyWidth = 15d;
-    public static double penaltyHeight = 11d;
+import game.play.GraphicalObject;
+
+public abstract class Bonus extends GraphicalObject {
+    public static double bonusWidth = 15;
+    public static double bonusHeight = 11;
     private double velocityY = -3;
     private double velocityX = new Random().nextInt(2) - 1;
     private double gravity = 0.1;
 
-    public Penalty(double positionX, double positionY) {
+    public Bonus(double positionX, double positionY) {
         super(positionX, positionY);
     }
 
