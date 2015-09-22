@@ -1,0 +1,13 @@
+Short instructions for creating a new map:
+
+1. Open .xlsx file named MapEditorTool in Excel or related Office product worked with table.
+2. In bobrdered area 20 columuns / 20 rows you can define your Pattern /map/. 
+3. You can can use allowed bricks from a Legend. /0,r,b,g,y,m/
+4. Use your imagine and drag and drop in cells to drow your shape.
+5. Save file in format Text(Tab delimited). Save as type: in Excel/.
+6. Your file name must have been baby.txt, easy.txt, hard.txt or pro.txt depends what level dificult you prefer to "re-Map" / mean change map pattern/.
+7. Save file in folder  src/levels , overwrite existing file.
+8. Open the newest file in notepad++ and remove legeng and next few rows.
+9. Replace /Ctrl+H/ -> Find what: \t in field Replace with: no any symbol. Click Replace All and save the changes.
+THAT'S ALL FOLKS FRIENDS :)
+ENJOY TO YOUR PERSONAL WALL !!!
